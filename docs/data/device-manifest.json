@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "project": "PCScreen ESP32-S3",
+  "channel": "stable",
+  "generatedAt": "2026-07-13T23:45:00+07:00",
+  "minimumPollSeconds": 900,
+  "endpoints": {
+    "effects": "./effects.json",
+    "firmware": "./firmware-manifest.json",
+    "documentation": "./docs.json",
+    "devices": "./devices.json"
+  },
+  "compatibility": {
+    "board": "esp32-s3-super-mini",
+    "flashMB": 4,
+    "display": "st7789-240x240"
+  }
+}
