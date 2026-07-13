@@ -44,6 +44,7 @@
       <nav class="nav" aria-label="Điều hướng chính">
         <button class="nav-item active" data-tab="overview"><span>⌂</span>Tổng quan</button>
         <button class="nav-item" data-tab="effects"><span>✦</span>Hiệu ứng</button>
+        <button class="nav-item" data-tab="pages"><span>▤</span>Trang hiển thị</button>
         <button class="nav-item" data-tab="firmware"><span>↟</span>Firmware</button>
         <button class="nav-item" data-tab="devices"><span>▣</span>Thiết bị</button>
         <button class="nav-item" data-tab="docs"><span>≡</span>Tài liệu</button>
@@ -62,6 +63,7 @@
           <h2 id="sectionTitle">Tổng quan hệ thống</h2>
         </div>
         <div class="top-actions">
+          <button class="button ghost compact" id="languageButton">EN</button>
           <button class="icon-button" id="themeButton" aria-label="Đổi giao diện">◐</button>
           <button class="button ghost compact" id="refreshButton">↻ Đồng bộ</button>
           <button class="button primary compact" id="publishButton">Xuất bản thay đổi</button>
@@ -93,7 +95,7 @@
           </article>
           <article class="release-card">
             <div class="release-top"><span class="pill success">Stable</span><span>ESP32-S3 · 4 MB</span></div>
-            <p>Firmware mới nhất</p><h3 id="currentVersion">v0.8.0</h3>
+            <p>Firmware mới nhất</p><h3 id="currentVersion">v1.0.0</h3>
             <div class="release-meta"><span><small>Kích thước</small><strong id="firmwareSize">1.2 MB</strong></span><span><small>Định dạng</small><strong>.pcota</strong></span></div>
             <button class="button full" data-go="firmware">Xem bản phát hành →</button>
           </article>
@@ -155,7 +157,7 @@
           <article class="panel">
             <div class="panel-head"><div><p class="eyebrow">OTA MANIFEST</p><h3>Bản phát hành ổn định</h3></div><span class="pill success">Ready</span></div>
             <form id="firmwareForm">
-              <div class="field-row three"><label class="field"><span>Phiên bản mới</span><input id="fwVersion" value="0.8.0"></label><label class="field"><span>Phiên bản tối thiểu</span><input id="fwMinVersion" value="0.5.0"></label><label class="field"><span>Kênh</span><select id="fwChannel"><option>stable</option><option>beta</option></select></label></div>
+              <div class="field-row three"><label class="field"><span>Phiên bản mới</span><input id="fwVersion" value="1.0.0"></label><label class="field"><span>Phiên bản tối thiểu</span><input id="fwMinVersion" value="1.0.0"></label><label class="field"><span>Kênh</span><select id="fwChannel"><option>stable</option><option>beta</option></select></label></div>
               <label class="field"><span>URL file .pcota trong GitHub Release</span><input id="fwUrl" type="url"></label>
               <div class="field-row"><label class="field"><span>SHA-256</span><input id="fwSha" minlength="64" maxlength="64"></label><label class="field"><span>Kích thước byte</span><input id="fwSize" type="number"></label></div>
               <label class="field"><span>Ghi chú phát hành, mỗi dòng một mục</span><textarea id="fwNotes" rows="6"></textarea></label>
@@ -167,6 +169,22 @@
             <p class="eyebrow">DEVICE EXPERIENCE</p><h3>Màn hình khi cập nhật</h3>
             <div class="ota-device"><div class="ota-ring"><span>72%</span></div><strong>Đang cập nhật</strong><small>Không ngắt nguồn thiết bị</small><div class="ota-progress"><i></i></div></div>
             <div class="safety-list"><span>✓ Kiểm tra board</span><span>✓ Kiểm tra kích thước</span><span>✓ Xác minh SHA-256</span><span>✓ Rollback khi lỗi</span></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-pages">
+        <div class="section-grid effects-layout">
+          <article class="panel">
+            <div class="panel-head"><div><p class="eyebrow">DISPLAY PAGES</p><h3>Tạo và sắp xếp trang</h3></div><button class="button primary compact" id="addPageButton">+ Thêm trang</button></div>
+            <p>Firmware có năm mẫu tối ưu 240×240. Bật/tắt và dùng nút lên/xuống để đổi thứ tự; ESP32 nhận qua <code>pages.json</code>.</p>
+            <div id="pageBuilder" class="effect-list"></div>
+          </article>
+          <article class="panel editor-panel">
+            <div class="panel-head"><div><p class="eyebrow">GLOBAL SETUP</p><h3>Cấu hình đồng bộ</h3></div></div>
+            <label class="field"><span>Ngôn ngữ mặc định</span><select id="pagesLanguage"><option value="vi">Tiếng Việt</option><option value="en">English</option></select></label>
+            <div class="notice info inline"><span>i</span><div><strong>Áp dụng có kiểm soát</strong><p>ESP32 tải danh sách trước; người dùng bấm “Áp dụng cấu hình trang” trên web cục bộ để xác nhận.</p></div></div>
+            <button class="button primary full" id="savePagesButton">Lưu pages.json vào bản nháp</button>
           </article>
         </div>
       </section>
@@ -192,6 +210,8 @@
               <div class="field-row"><label class="field"><span>Chủ sở hữu</span><input id="repoOwner" value="TienThanhDEV"></label><label class="field"><span>Repository</span><input id="repoName" value="Screen-Tunring-PC-ESP32s3"></label></div>
               <div class="field-row"><label class="field"><span>Nhánh</span><input id="repoBranch" value="main"></label><label class="field"><span>Thư mục Pages</span><input id="repoFolder" value="docs/data"></label></div>
               <label class="field"><span>Fine-grained token</span><input id="settingsToken" type="password" autocomplete="off" placeholder="Không bao giờ lưu vào trình duyệt"></label>
+              <div class="field-row"><label class="field"><span>Device API URL (Cloudflare Worker)</span><input id="workerUrl" type="url" placeholder="https://pcscreen-device-api....workers.dev"></label><label class="field"><span>ADMIN_KEY</span><input id="workerAdminKey" type="password" autocomplete="off" placeholder="Chỉ giữ trong tab này"></label></div>
+              <button class="button ghost" type="button" id="loadLiveDevices">Đọc thiết bị online</button>
               <div class="form-actions end"><button class="button ghost" type="button" id="disconnectButton">Ngắt kết nối</button><button class="button primary" type="submit">Kiểm tra kết nối</button></div>
             </form>
           </article>

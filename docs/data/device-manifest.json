@@ -5,12 +5,14 @@
   "generatedAt": "2026-07-14T00:55:00+07:00",
   "minimumPollSeconds": 900,
   "autoProvision": true,
+  "telemetryEndpoint": "",
   "identity": "wifi-station-mac",
   "endpoints": {
     "effects": "./effects.json",
     "firmware": "./firmware-manifest.json",
     "documentation": "./docs.json",
-    "devices": "./devices.json"
+    "devices": "./devices.json",
+    "pages": "./pages.json"
   },
   "compatibility": {
     "board": "esp32-s3-super-mini",

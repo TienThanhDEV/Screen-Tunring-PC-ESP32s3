@@ -10,6 +10,10 @@ const state = {
   firmware: {},
   devices: { devices: [] },
   docs: { documents: [] },
+  pages: { schemaVersion: 1, updatedAt: new Date().toISOString(), language: "vi", pages: [] },
+  language: "vi",
+  worker: { url: "", adminKey: "" },
+  liveDevices: [],
   selectedEffect: null
 };
 
@@ -18,10 +22,17 @@ const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const titles = {
   overview: ["CONTROL CENTER", "Tổng quan hệ thống"],
   effects: ["VISUAL SYSTEM", "Thư viện hiệu ứng"],
+  pages: ["DISPLAY PAGES", "Tạo và sắp xếp trang"],
   firmware: ["RELEASE CENTER", "Firmware & OTA"],
   devices: ["FLEET", "Quản lý thiết bị"],
   docs: ["KNOWLEDGE BASE", "Tài liệu kỹ thuật"],
   settings: ["SECURITY", "Kết nối GitHub"]
+};
+const titlesEn = {
+  overview: ["CONTROL CENTER", "System overview"], effects: ["VISUAL SYSTEM", "Effect library"],
+  pages: ["DISPLAY PAGES", "Create and reorder pages"], firmware: ["RELEASE CENTER", "Firmware & OTA"],
+  devices: ["FLEET", "Device management"], docs: ["KNOWLEDGE BASE", "Documentation"],
+  settings: ["SECURITY", "GitHub connection"]
 };
 
 function escapeHtml(value) {
@@ -39,8 +50,9 @@ function showToast(message, type = "success") {
 function setTab(name) {
   $$(".nav-item").forEach(node => node.classList.toggle("active", node.dataset.tab === name));
   $$(".tab-panel").forEach(node => node.classList.toggle("active", node.id === `tab-${name}`));
-  $("#sectionEyebrow").textContent = titles[name][0];
-  $("#sectionTitle").textContent = titles[name][1];
+  const selectedTitles = state.language === "en" ? titlesEn : titles;
+  $("#sectionEyebrow").textContent = selectedTitles[name][0];
+  $("#sectionTitle").textContent = selectedTitles[name][1];
   if (window.innerWidth < 600) window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -56,16 +68,18 @@ async function fetchJson(path, fallback) {
 }
 
 async function loadData() {
-  const [effects, firmware, devices, docs] = await Promise.all([
+  const [effects, firmware, devices, docs, pages] = await Promise.all([
     fetchJson("data/effects.json", state.effects),
     fetchJson("data/firmware-manifest.json", state.firmware),
     fetchJson("data/devices.json", state.devices),
-    fetchJson("data/docs.json", state.docs)
+    fetchJson("data/docs.json", state.docs),
+    fetchJson("data/pages.json", state.pages)
   ]);
   state.effects = effects;
   state.firmware = firmware;
   state.devices = devices;
   state.docs = docs;
+  state.pages = pages;
   renderAll();
 }
 
@@ -74,11 +88,33 @@ function renderAll() {
   renderFirmware();
   renderDevices();
   renderDocs();
+  renderPages();
   $("#effectCount").textContent = state.effects.effects.length;
   $("#deviceCount").textContent = state.devices.devices.length;
   $("#currentVersion").textContent = `v${state.firmware.latestVersion || "—"}`;
   $("#firmwareSize").textContent = formatBytes(state.firmware.size || 0);
   $("#manifestTime").textContent = `cập nhật ${new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}`;
+}
+
+const pageNames = {
+  vi: ["Tổng quan", "Nhiệt độ", "Làm mát", "Hiệu năng", "Logo khởi động"],
+  en: ["Overview", "Temperature", "Cooling", "Performance", "Boot logo"]
+};
+
+function renderPages() {
+  const names = pageNames[state.language] || pageNames.vi;
+  $("#pagesLanguage").value = state.pages.language || "vi";
+  $("#pageBuilder").innerHTML = state.pages.pages.map((page, index) => `<div class="effect-card"><span class="effect-swatch" style="--c1:#47e3ad;--c2:#70a5ff"></span><div><strong>${escapeHtml(names[page.type] || page.id)}</strong><small>ID ${page.type} · ${page.enabled ? "ON" : "OFF"}</small></div><div class="table-actions"><button class="button ghost compact" data-page-up="${index}" ${index === 0 ? "disabled" : ""}>↑</button><button class="button ghost compact" data-page-down="${index}" ${index === state.pages.pages.length - 1 ? "disabled" : ""}>↓</button><button class="button ghost compact" data-page-toggle="${index}">${page.enabled ? "Tắt" : "Bật"}</button></div></div>`).join("");
+  $$('[data-page-up]').forEach(button => button.addEventListener("click", () => movePage(Number(button.dataset.pageUp), -1)));
+  $$('[data-page-down]').forEach(button => button.addEventListener("click", () => movePage(Number(button.dataset.pageDown), 1)));
+  $$('[data-page-toggle]').forEach(button => button.addEventListener("click", () => { const page = state.pages.pages[Number(button.dataset.pageToggle)]; if (page) { page.enabled = !page.enabled; markDirty("pages.json"); renderPages(); } }));
+}
+
+function movePage(index, delta) {
+  const target = index + delta;
+  if (target < 0 || target >= state.pages.pages.length) return;
+  [state.pages.pages[index], state.pages.pages[target]] = [state.pages.pages[target], state.pages.pages[index]];
+  markDirty("pages.json"); renderPages();
 }
 
 function renderEffects() {
@@ -136,7 +172,11 @@ function renderFirmware() {
 }
 
 function renderDevices() {
-  $("#deviceTable").innerHTML = state.devices.devices.map((device, index) => `<tr><td><div class="device-name"><span class="device-avatar">▣</span><div><strong>${escapeHtml(device.name)}</strong><small>${escapeHtml(device.id)}</small><small>${escapeHtml(device.mac || "Chưa gán MAC")}</small></div></div></td><td><strong>${escapeHtml(device.board)}</strong><small>${device.flashMB} MB flash</small></td><td>v${escapeHtml(device.firmware)}</td><td><span class="pill">${escapeHtml(device.channel)}</span></td><td><span class="pill ${device.enabled ? "success" : ""}">${device.enabled ? "Được phép" : "Tạm khóa"}</span></td><td><div class="table-actions"><button class="button ghost compact" data-toggle-device="${index}">${device.enabled ? "Khóa" : "Mở"}</button><button class="button danger compact" data-remove-device="${index}">Xóa</button></div></td></tr>`).join("");
+  const liveById = new Map(state.liveDevices.map(device => [device.deviceId, device]));
+  const known = new Set(state.devices.devices.map(device => device.id));
+  const rows = state.devices.devices.map((device, index) => ({ ...device, index, live: liveById.get(device.id) }));
+  state.liveDevices.filter(device => !known.has(device.deviceId)).forEach(device => rows.push({ id: device.deviceId, mac: device.mac, name: "Thiết bị tự liên kết", board: device.board, flashMB: device.flashMB, firmware: device.firmware, channel: "stable", enabled: true, index: -1, live: device }));
+  $("#deviceTable").innerHTML = rows.map(device => { const age = device.live ? Date.now() - Number(device.live.receivedAtMs || 0) : Infinity, online = age < 660000; return `<tr><td><div class="device-name"><span class="device-avatar">▣</span><div><strong>${escapeHtml(device.name)}</strong><small>${escapeHtml(device.id)}</small><small>${escapeHtml(device.mac || "Chưa gán MAC")}</small></div></div></td><td><strong>${escapeHtml(device.board)}</strong><small>${device.flashMB} MB flash</small></td><td>v${escapeHtml(device.live?.firmware || device.firmware)}</td><td><span class="pill">${escapeHtml(device.channel)}</span></td><td><span class="pill ${online ? "success" : ""}">${online ? "Online" : device.live ? "Offline" : "Chưa báo cáo"}</span></td><td>${device.index >= 0 ? `<div class="table-actions"><button class="button ghost compact" data-toggle-device="${device.index}">${device.enabled ? "Khóa" : "Mở"}</button><button class="button danger compact" data-remove-device="${device.index}">Xóa</button></div>` : "Tự cấp phép"}</td></tr>`; }).join("");
   $$('[data-toggle-device]').forEach(button => button.addEventListener("click", () => {
     const device = state.devices.devices[Number(button.dataset.toggleDevice)];
     if (!device) return;
@@ -236,6 +276,7 @@ function jsonFor(file) {
     "firmware-manifest.json": state.firmware,
     "devices.json": state.devices,
     "docs.json": state.docs
+    ,"pages.json": state.pages
   };
   return JSON.stringify(map[file], null, 2) + "\n";
 }
@@ -299,7 +340,7 @@ async function commitFile(file, message) {
 }
 
 async function publishChanges() {
-  const files = state.dirty.size ? [...state.dirty] : ["effects.json", "firmware-manifest.json", "devices.json"];
+  const files = state.dirty.size ? [...state.dirty] : ["effects.json", "pages.json", "firmware-manifest.json", "devices.json"];
   if (!state.connected) {
     files.forEach(file => downloadText(file, jsonFor(file)));
     showToast("Đã tải các file JSON. Kết nối token để commit trực tiếp.");
@@ -323,7 +364,7 @@ async function publishChanges() {
 }
 
 function openPublishModal() {
-  const files = state.dirty.size ? [...state.dirty] : ["effects.json", "firmware-manifest.json", "devices.json"];
+  const files = state.dirty.size ? [...state.dirty] : ["effects.json", "pages.json", "firmware-manifest.json", "devices.json"];
   $("#publishFiles").innerHTML = files.map(file => `<div class="publish-file"><strong>${escapeHtml(file)}</strong><span>${state.connected ? "COMMIT" : "DOWNLOAD"}</span></div>`).join("");
   $("#publishSummary").textContent = state.connected ? `Các file sẽ được ghi vào ${state.repo.owner}/${state.repo.name}, nhánh ${state.repo.branch}.` : "Chế độ demo sẽ tải các file JSON về máy để bạn kiểm tra.";
   $("#confirmPublishButton").textContent = state.connected ? "Commit lên GitHub" : "Tải các file JSON";
@@ -349,13 +390,35 @@ function bindEvents() {
     finally { button.disabled = false; button.textContent = "Kết nối quản trị"; }
   });
   $("#themeButton").addEventListener("click", () => document.body.classList.toggle("light"));
+  $("#languageButton").addEventListener("click", () => {
+    state.language = state.language === "vi" ? "en" : "vi";
+    document.documentElement.lang = state.language;
+    $("#languageButton").textContent = state.language === "vi" ? "EN" : "VI";
+    const vi = ["Tổng quan","Hiệu ứng","Trang hiển thị","Firmware","Thiết bị","Tài liệu","Kết nối GitHub"], en = ["Overview","Effects","Display pages","Firmware","Devices","Documentation","GitHub connection"];
+    $$(".nav-item").forEach((node, index) => { const icon = node.querySelector("span")?.outerHTML || ""; node.innerHTML = `${icon}${(state.language === "vi" ? vi : en)[index]}`; });
+    renderPages(); setTab($(".nav-item.active")?.dataset.tab || "overview");
+  });
   $("#refreshButton").addEventListener("click", async () => { await loadData(); showToast("Đã đồng bộ lại dữ liệu công khai."); });
   $("#publishButton").addEventListener("click", openPublishModal);
   $("#openSettingsButton").addEventListener("click", () => setTab("settings"));
   $("#modalClose").addEventListener("click", closeModal);
   $("#modalBackdrop").addEventListener("click", event => { if (event.target === $("#modalBackdrop")) closeModal(); });
   $("#confirmPublishButton").addEventListener("click", publishChanges);
-  $("#downloadAllButton").addEventListener("click", () => ["effects.json", "firmware-manifest.json", "devices.json", "docs.json"].forEach(file => downloadText(file, jsonFor(file))));
+  $("#downloadAllButton").addEventListener("click", () => ["effects.json", "firmware-manifest.json", "devices.json", "docs.json", "pages.json"].forEach(file => downloadText(file, jsonFor(file))));
+
+  $("#addPageButton").addEventListener("click", () => {
+    const used = new Set(state.pages.pages.map(page => page.type)), type = [0,1,2,3,4].find(value => !used.has(value));
+    if (type === undefined) { showToast("Đã có đủ 5 mẫu trang.", "error"); return; }
+    const ids = ["overview","temperature","cooling","performance","boot-logo"];
+    state.pages.pages.push({ id: ids[type], type, enabled: true }); markDirty("pages.json"); renderPages();
+  });
+  $("#savePagesButton").addEventListener("click", () => { state.pages.language = $("#pagesLanguage").value; state.pages.updatedAt = new Date().toISOString(); markDirty("pages.json"); renderPages(); showToast("Đã lưu cấu hình trang vào bản nháp."); });
+
+  $("#loadLiveDevices").addEventListener("click", async () => {
+    state.worker.url = $("#workerUrl").value.trim().replace(/\/$/, ""); state.worker.adminKey = $("#workerAdminKey").value.trim();
+    if (!/^https:\/\//.test(state.worker.url) || !state.worker.adminKey) { showToast("Nhập Worker URL và ADMIN_KEY.", "error"); return; }
+    try { const response = await fetch(`${state.worker.url}/api/v1/devices`, { headers: { Authorization: `Bearer ${state.worker.adminKey}` } }); const body = await response.json(); if (!response.ok) throw new Error(body.error || response.status); state.liveDevices = body.devices || []; renderDevices(); showToast(`Đã đọc ${state.liveDevices.length} thiết bị báo cáo.`); } catch (error) { showToast(`Device API: ${error.message}`, "error"); }
+  });
 
   $("#effectForm").addEventListener("submit", event => {
     event.preventDefault();
