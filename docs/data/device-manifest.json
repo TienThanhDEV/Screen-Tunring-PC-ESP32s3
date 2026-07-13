@@ -2,8 +2,10 @@
   "schemaVersion": 1,
   "project": "PCScreen ESP32-S3",
   "channel": "stable",
-  "generatedAt": "2026-07-13T23:45:00+07:00",
+  "generatedAt": "2026-07-14T00:55:00+07:00",
   "minimumPollSeconds": 900,
+  "autoProvision": true,
+  "identity": "wifi-station-mac",
   "endpoints": {
     "effects": "./effects.json",
     "firmware": "./firmware-manifest.json",

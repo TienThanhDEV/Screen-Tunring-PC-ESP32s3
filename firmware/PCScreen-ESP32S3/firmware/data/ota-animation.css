@@ -1,0 +1,39 @@
+.ota-animation {
+  display: none;
+  margin-top: 18px;
+  min-height: 170px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 12%, var(--surface)), var(--surface));
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+}
+
+.ota-animation.active {
+  display: grid;
+  animation: otaFade .25s ease-out;
+}
+
+.ota-animation span { color: var(--muted); font-size: .9rem; }
+
+.ota-spinner {
+  width: 58px;
+  height: 58px;
+  border: 6px solid var(--line);
+  border-top-color: var(--accent);
+  border-right-color: #4d9fff;
+  border-radius: 50%;
+  animation: otaSpin .8s linear infinite;
+}
+
+.ota-animation.success .ota-spinner {
+  border-color: var(--accent);
+  animation: otaPulse .7s ease-in-out infinite alternate;
+}
+
+.ota-animation.failed .ota-spinner { border-color: #dc4c64; animation: none; }
+
+@keyframes otaSpin { to { transform: rotate(360deg); } }
+@keyframes otaPulse { to { transform: scale(1.12); opacity: .65; } }
+@keyframes otaFade { from { opacity: 0; transform: translateY(8px); } }

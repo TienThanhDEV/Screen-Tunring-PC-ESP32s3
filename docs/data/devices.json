@@ -4,10 +4,11 @@
   "devices": [
     {
       "id": "PCSCREEN-S3-DEMO",
+      "mac": "00:00:00:00:00:00",
       "name": "PC Screen bàn làm việc",
       "board": "ESP32-S3 Super Mini",
       "flashMB": 4,
-      "firmware": "0.6.0",
+      "firmware": "0.7.0",
       "channel": "stable",
       "enabled": true
     }

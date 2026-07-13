@@ -1,20 +1,23 @@
 {
   "schemaVersion": 1,
   "channel": "stable",
-  "latestVersion": "0.6.0",
-  "publishedAt": "2026-07-13T23:45:00+07:00",
+  "latestVersion": "0.7.1",
+  "publishedAt": "2026-07-14T01:45:00+07:00",
   "mandatory": false,
   "minimumVersion": "0.5.0",
   "board": "esp32-s3-super-mini",
   "flashMB": 4,
   "format": "pcota",
-  "size": 1021424,
-  "sha256": "39b4180e9ae8c2f61121a2855ecdce06768d1b7ce155e0c17ac46d360cbafd7f",
-  "downloadUrl": "https://github.com/TienThanhDEV/Screen-Tunring-PC-ESP32s3/releases/download/v0.6.0/PCScreen-S3-4MB-v0.6.0-CONTROLS-OTA.pcota",
+  "size": 1209632,
+  "sha256": "2fbe3cdda0a3d4f9016db87755c2ccb2c1ef7ed7dc0a4a8efb21dd726657eaaf",
+  "downloadUrl": "https://github.com/TienThanhDEV/Screen-Tunring-PC-ESP32s3/releases/download/v0.7.1/PCScreen-S3-4MB-v0.7.1-OTA-SCREEN.pcota",
   "releaseNotes": [
-    "Giao diện Bento 240 × 240 rõ nét hơn",
-    "Cập nhật OTA một tệp và animation riêng",
-    "Điều khiển backlight GPIO8 và RGB tích hợp",
-    "Đồng bộ thời gian NTP và cấu hình qua web"
+    "Màn hình OTA 240×240 mới với vòng phần trăm và thanh tiến trình",
+    "Trạng thái riêng khi nhận dữ liệu, xác minh, hoàn tất và thất bại",
+    "Tự nhận dạng Device ID theo MAC Wi-Fi",
+    "Tự đồng bộ registry và manifest từ GitHub Pages",
+    "Kiểm tra, tải và cài OTA Internet ngay trên web cục bộ",
+    "Xác minh kích thước, board 4 MB và SHA-256 trước khi kích hoạt",
+    "Giữ nguyên Bento 240×240, ảnh/GIF, RGB, NTP và USB telemetry"
   ]
 }

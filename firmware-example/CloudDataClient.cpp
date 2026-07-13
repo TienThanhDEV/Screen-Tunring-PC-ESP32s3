@@ -39,7 +39,7 @@ bool CloudDataClient::getJson(const String& path, JsonDocument& output, String& 
   }
 
   http.addHeader("Accept", "application/json");
-  http.addHeader("User-Agent", "PCScreen-S3/0.6.0");
+  http.addHeader("User-Agent", "PCScreen-S3/0.7.0");
   const int status = http.GET();
   if (status != HTTP_CODE_OK) {
     error = "HTTP " + String(status) + " khi tai " + url;

@@ -7,7 +7,7 @@
 // Không commit mật khẩu thật. Với firmware chính, hãy lấy Wi-Fi từ NVS/web setup.
 constexpr char WIFI_SSID[] = "YOUR_WIFI_NAME";
 constexpr char WIFI_PASSWORD[] = "YOUR_WIFI_PASSWORD";
-constexpr char CURRENT_FIRMWARE[] = "0.6.0";
+constexpr char CURRENT_FIRMWARE[] = "0.7.0";
 constexpr char CLOUD_DATA_URL[] =
     "https://tienthanhdev.github.io/Screen-Tunring-PC-ESP32s3/data";
 

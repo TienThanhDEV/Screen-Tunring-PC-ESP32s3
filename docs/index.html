@@ -93,8 +93,8 @@
           </article>
           <article class="release-card">
             <div class="release-top"><span class="pill success">Stable</span><span>ESP32-S3 · 4 MB</span></div>
-            <p>Firmware mới nhất</p><h3 id="currentVersion">v0.6.0</h3>
-            <div class="release-meta"><span><small>Kích thước</small><strong id="firmwareSize">997.5 KB</strong></span><span><small>Định dạng</small><strong>.pcota</strong></span></div>
+            <p>Firmware mới nhất</p><h3 id="currentVersion">v0.7.1</h3>
+            <div class="release-meta"><span><small>Kích thước</small><strong id="firmwareSize">1.2 MB</strong></span><span><small>Định dạng</small><strong>.pcota</strong></span></div>
             <button class="button full" data-go="firmware">Xem bản phát hành →</button>
           </article>
         </div>
@@ -152,12 +152,12 @@
           <article class="panel">
             <div class="panel-head"><div><p class="eyebrow">OTA MANIFEST</p><h3>Bản phát hành ổn định</h3></div><span class="pill success">Ready</span></div>
             <form id="firmwareForm">
-              <div class="field-row three"><label class="field"><span>Phiên bản mới</span><input id="fwVersion" value="0.6.0"></label><label class="field"><span>Phiên bản tối thiểu</span><input id="fwMinVersion" value="0.5.0"></label><label class="field"><span>Kênh</span><select id="fwChannel"><option>stable</option><option>beta</option></select></label></div>
+              <div class="field-row three"><label class="field"><span>Phiên bản mới</span><input id="fwVersion" value="0.7.1"></label><label class="field"><span>Phiên bản tối thiểu</span><input id="fwMinVersion" value="0.5.0"></label><label class="field"><span>Kênh</span><select id="fwChannel"><option>stable</option><option>beta</option></select></label></div>
               <label class="field"><span>URL file .pcota trong GitHub Release</span><input id="fwUrl" type="url"></label>
               <div class="field-row"><label class="field"><span>SHA-256</span><input id="fwSha" minlength="64" maxlength="64"></label><label class="field"><span>Kích thước byte</span><input id="fwSize" type="number"></label></div>
               <label class="field"><span>Ghi chú phát hành, mỗi dòng một mục</span><textarea id="fwNotes" rows="6"></textarea></label>
               <label class="switch-row"><span><strong>Bắt buộc cập nhật</strong><small>Chỉ bật khi bản cũ có lỗi nghiêm trọng</small></span><input id="fwMandatory" type="checkbox"><i></i></label>
-              <div class="form-actions end"><button class="button ghost" type="button" id="downloadFirmwareJson">Tải JSON</button><button class="button primary" type="submit">Lưu manifest</button></div>
+              <div class="form-actions end"><a class="button ghost" id="downloadFirmwareAsset" href="#" target="_blank" rel="noopener">Tải firmware .pcota</a><button class="button ghost" type="button" id="downloadFirmwareJson">Tải JSON</button><button class="button primary" type="submit">Lưu manifest</button></div>
             </form>
           </article>
           <article class="panel ota-preview">
@@ -171,7 +171,8 @@
       <section class="tab-panel" id="tab-devices">
         <article class="panel">
           <div class="panel-head"><div><p class="eyebrow">DEVICE REGISTRY</p><h3>Thiết bị được phép nhận cấu hình</h3></div><button class="button primary compact" id="addDeviceButton">+ Đăng ký thiết bị</button></div>
-          <div class="table-wrap"><table><thead><tr><th>Thiết bị</th><th>Phần cứng</th><th>Firmware</th><th>Kênh</th><th>Trạng thái</th></tr></thead><tbody id="deviceTable"></tbody></table></div>
+          <div class="table-wrap"><table><thead><tr><th>Thiết bị / MAC</th><th>Phần cứng</th><th>Firmware</th><th>Kênh</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody id="deviceTable"></tbody></table></div>
+          <div class="notice info inline"><span>✓</span><div><strong>Tự liên kết không cần xác thực</strong><p>Sau khi nạp firmware và nhập Wi-Fi, ESP32 tự tạo Device ID từ MAC rồi đọc registry/manifest công khai. Không dán GitHub token vào thiết bị.</p></div></div>
           <div class="notice info inline"><span>i</span><div><strong>Giới hạn của GitHub Pages</strong><p>Trang tĩnh không nhận heartbeat/telemetry từ ESP32. Registry này là danh sách cấu hình; để xem online/offline thời gian thực cần thêm API như Cloudflare Worker, Firebase hoặc Supabase.</p></div></div>
         </article>
       </section>

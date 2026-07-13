@@ -126,10 +126,28 @@ function renderFirmware() {
   $("#fwSize").value = fw.size || "";
   $("#fwNotes").value = (fw.releaseNotes || []).join("\n");
   $("#fwMandatory").checked = Boolean(fw.mandatory);
+  $("#downloadFirmwareAsset").href = fw.downloadUrl || "#";
+  $("#downloadFirmwareAsset").classList.toggle("is-disabled", !fw.downloadUrl);
 }
 
 function renderDevices() {
-  $("#deviceTable").innerHTML = state.devices.devices.map(device => `<tr><td><div class="device-name"><span class="device-avatar">▣</span><div><strong>${escapeHtml(device.name)}</strong><small>${escapeHtml(device.id)}</small></div></div></td><td><strong>${escapeHtml(device.board)}</strong><small>${device.flashMB} MB flash</small></td><td>v${escapeHtml(device.firmware)}</td><td><span class="pill">${escapeHtml(device.channel)}</span></td><td><span class="pill ${device.enabled ? "success" : ""}">${device.enabled ? "Được phép" : "Tạm khóa"}</span></td></tr>`).join("");
+  $("#deviceTable").innerHTML = state.devices.devices.map((device, index) => `<tr><td><div class="device-name"><span class="device-avatar">▣</span><div><strong>${escapeHtml(device.name)}</strong><small>${escapeHtml(device.id)}</small><small>${escapeHtml(device.mac || "Chưa gán MAC")}</small></div></div></td><td><strong>${escapeHtml(device.board)}</strong><small>${device.flashMB} MB flash</small></td><td>v${escapeHtml(device.firmware)}</td><td><span class="pill">${escapeHtml(device.channel)}</span></td><td><span class="pill ${device.enabled ? "success" : ""}">${device.enabled ? "Được phép" : "Tạm khóa"}</span></td><td><div class="table-actions"><button class="button ghost compact" data-toggle-device="${index}">${device.enabled ? "Khóa" : "Mở"}</button><button class="button danger compact" data-remove-device="${index}">Xóa</button></div></td></tr>`).join("");
+  $$('[data-toggle-device]').forEach(button => button.addEventListener("click", () => {
+    const device = state.devices.devices[Number(button.dataset.toggleDevice)];
+    if (!device) return;
+    device.enabled = !device.enabled; markDirty("devices.json"); renderDevices();
+  }));
+  $$('[data-remove-device]').forEach(button => button.addEventListener("click", () => {
+    const index = Number(button.dataset.removeDevice), device = state.devices.devices[index];
+    if (!device || !confirm(`Xóa ${device.name} khỏi registry?`)) return;
+    state.devices.devices.splice(index, 1); markDirty("devices.json"); renderDevices(); $("#deviceCount").textContent = state.devices.devices.length;
+  }));
+}
+
+function normalizeMac(value) {
+  const compact = String(value || "").replace(/[^0-9a-f]/gi, "").toUpperCase();
+  if (compact.length !== 12) return "";
+  return compact.match(/.{2}/g).join(":");
 }
 
 function renderDocs() {
@@ -354,8 +372,11 @@ function bindEvents() {
   });
   $("#downloadFirmwareJson").addEventListener("click", () => { try { validateFirmware(); downloadText("firmware-manifest.json", jsonFor("firmware-manifest.json")); } catch (error) { showToast(error.message, "error"); } });
   $("#addDeviceButton").addEventListener("click", () => {
-    const id = prompt("Device ID, ví dụ PCSCREEN-S3-02:"); if (!id) return;
-    state.devices.devices.push({ id: id.trim(), name: `PC Screen ${state.devices.devices.length + 1}`, board: "ESP32-S3 Super Mini", flashMB: 4, firmware: state.firmware.latestVersion || "0.6.0", channel: "stable", enabled: true });
+    const rawMac = prompt("Nhập MAC hiển thị trong tab Cloud của ESP32, ví dụ A4:CF:12:34:56:78:"); if (!rawMac) return;
+    const mac = normalizeMac(rawMac); if (!mac) { showToast("MAC phải có đúng 12 ký tự hex.", "error"); return; }
+    if (state.devices.devices.some(device => normalizeMac(device.mac) === mac)) { showToast("MAC này đã có trong registry.", "error"); return; }
+    const name = prompt("Tên dễ nhớ cho thiết bị:", `PC Screen ${state.devices.devices.length + 1}`) || `PC Screen ${state.devices.devices.length + 1}`;
+    state.devices.devices.push({ id: `PCSCREEN-${mac.replaceAll(":", "")}`, mac, name: name.trim(), board: "ESP32-S3 Super Mini", flashMB: 4, firmware: state.firmware.latestVersion || "0.7.0", channel: "stable", enabled: true });
     markDirty("devices.json"); renderDevices(); $("#deviceCount").textContent = state.devices.devices.length;
   });
 
