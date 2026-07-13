@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "channel": "stable",
+  "latestVersion": "0.6.0",
+  "publishedAt": "2026-07-13T23:45:00+07:00",
+  "mandatory": false,
+  "minimumVersion": "0.5.0",
+  "board": "esp32-s3-super-mini",
+  "flashMB": 4,
+  "format": "pcota",
+  "size": 1021424,
+  "sha256": "39b4180e9ae8c2f61121a2855ecdce06768d1b7ce155e0c17ac46d360cbafd7f",
+  "downloadUrl": "https://github.com/TienThanhDEV/Screen-Tunring-PC-ESP32s3/releases/download/v0.6.0/PCScreen-S3-4MB-v0.6.0.pcota",
+  "releaseNotes": [
+    "Giao diện Bento 240 × 240 rõ nét hơn",
+    "Cập nhật OTA một tệp và animation riêng",
+    "Điều khiển backlight GPIO8 và RGB tích hợp",
+    "Đồng bộ thời gian NTP và cấu hình qua web"
+  ]
+}
