@@ -1,23 +1,21 @@
 {
   "schemaVersion": 1,
   "channel": "stable",
-  "latestVersion": "1.0.0",
-  "publishedAt": "2026-07-14T03:00:00+07:00",
+  "latestVersion": "1.1.0",
+  "publishedAt": "2026-07-14T04:00:00+07:00",
   "mandatory": false,
   "minimumVersion": "1.0.0",
   "board": "esp32-s3-super-mini",
   "flashMB": 4,
   "format": "pcota",
-  "size": 1243216,
-  "sha256": "c88cccf888e36938a1bf157b800f3e3c4f605d3a32618fed304ee638e040c5b3",
-  "downloadUrl": "https://github.com/TienThanhDEV/Screen-Tunring-PC-ESP32s3/releases/download/v1.0.0/PCScreen-S3-4MB-v1.0.0-BILINGUAL-CLOUD.pcota",
+  "size": 1247312,
+  "sha256": "bd53458234a63f0a1fade2f8ef22deb5353f4183d264f519e7624b6e404ec6b7",
+  "downloadUrl": "https://github.com/TienThanhDEV/Screen-Tunring-PC-ESP32s3/releases/download/v1.1.0/PCScreen-S3-4MB-v1.1.0-FULL-MAC-STATS.pcota",
   "releaseNotes": [
-    "Tiếng Việt có dấu và English trên TFT, website ESP32 và Cloud Console",
-    "Tạo, bật/tắt và sắp xếp trang bằng pages.json",
-    "Đồng bộ cấu hình trang từ GitHub rồi áp dụng có kiểm soát trên ESP32",
-    "ESP32 tự báo cáo heartbeat/telemetry theo MAC đến Device API",
-    "Cloud Console đọc trạng thái online/offline qua Cloudflare Worker KV",
-    "Giữ nguyên Bento 240×240, ảnh/GIF, RGB, NTP, USB telemetry và OTA an toàn",
-    "Lần đầu lên 1.0.0 phải nạp full.bin qua USB để đổi partition 4 MB"
+    "Bổ sung Disk, Network download/upload, uptime, process count và load average từ macOS Intel",
+    "Trang Performance tự luân phiên với System mỗi 5 giây để hiển thị đủ thông số",
+    "Bento tự dùng CPU Load khi FPS không có và Disk khi GPU fan không có",
+    "Bổ sung CPU/GPU power và GPU load khi macOS cung cấp dữ liệu",
+    "Giữ nguyên Cloud, OTA an toàn, ảnh/GIF, RGB, NTP, USB telemetry và giao diện song ngữ"
   ]
 }
