@@ -2,12 +2,32 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include <Preferences.h>
+#include <array>
 #include <functional>
 
 #include "OtaStatus.h"
 
 class CloudFleetClient final {
  public:
+  static constexpr size_t MAX_EFFECTS = 8;
+
+  struct EffectPreset {
+    String id;
+    String name;
+    String type;
+    std::array<String, 3> palette;
+    uint8_t paletteSize = 0;
+    uint8_t speed = 50;
+    uint8_t brightness = 50;
+    bool enabled = true;
+    String theme;
+    int8_t rotation = -1;
+    int8_t autoRotate = -1;
+    int16_t pageInterval = -1;
+    int16_t pageMask = -1;
+  };
+
   struct FirmwareInfo {
     String version;
     String minimumVersion;
@@ -33,6 +53,9 @@ class CloudFleetClient final {
     bool autoProvision = true;
     bool updateAvailable = false;
     bool mandatory = false;
+    size_t effectCount = 0;
+    String selectedEffectId;
+    String effectsUpdatedAt;
     uint32_t lastCheckMs = 0;
     uint32_t nextCheckMs = 0;
   };
@@ -44,9 +67,14 @@ class CloudFleetClient final {
   bool checkNow();
   bool installAvailableUpdate(std::function<void()> frameCallback = nullptr);
   Status status() const;
+  size_t effectCount() const;
+  const EffectPreset* effectAt(size_t index) const;
+  const EffectPreset* findEffect(const String& id) const;
+  void selectEffect(const String& id);
 
  private:
   OtaStatus& otaStatus_;
+  Preferences preferences_;
   FirmwareInfo firmware_;
   String deviceId_;
   String mac_;
@@ -61,10 +89,15 @@ class CloudFleetClient final {
   uint32_t startedAtMs_ = 0;
   uint32_t lastCheckMs_ = 0;
   uint32_t pollIntervalMs_ = 15UL * 60UL * 1000UL;
+  std::array<EffectPreset, MAX_EFFECTS> effects_;
+  size_t effectCount_ = 0;
+  String effectsUpdatedAt_;
+  String selectedEffectId_;
 
   bool fetchControlManifest();
   bool fetchDeviceRegistry();
   bool fetchFirmwareManifest();
+  bool fetchEffects();
   bool getJson(const String& name, JsonDocument& output, String& error);
   void buildIdentity();
   static int compareVersions(const String& left, const String& right);

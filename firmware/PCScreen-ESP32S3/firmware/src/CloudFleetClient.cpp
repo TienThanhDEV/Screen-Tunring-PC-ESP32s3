@@ -58,6 +58,9 @@ CloudFleetClient::CloudFleetClient(OtaStatus& otaStatus)
 
 void CloudFleetClient::begin() {
   buildIdentity();
+  if (preferences_.begin("cloud", false)) {
+    selectedEffectId_ = preferences_.getString("effect", "");
+  }
   startedAtMs_ = millis();
   pollIntervalMs_ = AppConfig::CLOUD_DEFAULT_POLL_MS;
 }
@@ -93,10 +96,64 @@ bool CloudFleetClient::checkNow() {
   const bool controlOk = fetchControlManifest();
   const bool registryOk = controlOk && fetchDeviceRegistry();
   const bool firmwareOk = controlOk && fetchFirmwareManifest();
-  serverReachable_ = controlOk && registryOk && firmwareOk;
+  const bool effectsOk = controlOk && fetchEffects();
+  serverReachable_ = controlOk && registryOk && firmwareOk && effectsOk;
   lastCheckMs_ = millis();
   checking_ = false;
   return serverReachable_;
+}
+
+bool CloudFleetClient::fetchEffects() {
+  JsonDocument document;
+  String error;
+  if (!getJson("effects.json", document, error)) {
+    lastError_ = error;
+    return false;
+  }
+  if (document["schemaVersion"].as<int>() != 1 ||
+      !document["effects"].is<JsonArray>()) {
+    lastError_ = "effects_manifest_invalid";
+    return false;
+  }
+
+  effectCount_ = 0;
+  effectsUpdatedAt_ = String(document["updatedAt"] | "");
+  for (JsonObject item : document["effects"].as<JsonArray>()) {
+    if (effectCount_ >= effects_.size()) break;
+    const String id = String(item["id"] | "").substring(0, 40);
+    if (id.isEmpty()) continue;
+    EffectPreset& effect = effects_[effectCount_++];
+    effect = EffectPreset{};
+    effect.id = id;
+    effect.name = String(item["name"] | id).substring(0, 40);
+    effect.type = String(item["type"] | "solid").substring(0, 16);
+    effect.enabled = item["enabled"] | true;
+    effect.speed = constrain(item["speed"] | 50, 1, 100);
+    effect.brightness = constrain(item["brightness"] | 50, 0, 100);
+    if (item["palette"].is<JsonArray>()) {
+      for (JsonVariant color : item["palette"].as<JsonArray>()) {
+        if (effect.paletteSize >= effect.palette.size()) break;
+        String value = color.as<String>();
+        if (value.length() == 7 && value[0] == '#') {
+          effect.palette[effect.paletteSize++] = value;
+        }
+      }
+    }
+    if (item["display"].is<JsonObject>()) {
+      JsonObject display = item["display"].as<JsonObject>();
+      effect.theme = String(display["theme"] | "");
+      if (display["rotation"].is<int>())
+        effect.rotation = constrain(display["rotation"].as<int>(), 0, 3);
+      if (display["autoRotate"].is<bool>())
+        effect.autoRotate = display["autoRotate"].as<bool>() ? 1 : 0;
+      if (display["pageInterval"].is<int>())
+        effect.pageInterval = constrain(display["pageInterval"].as<int>(), 2, 30);
+      if (display["pageMask"].is<int>())
+        effect.pageMask = constrain(display["pageMask"].as<int>(), 1, 31);
+    }
+  }
+  if (effectCount_ == 0) selectedEffectId_.clear();
+  return true;
 }
 
 bool CloudFleetClient::fetchControlManifest() {
@@ -392,9 +449,32 @@ CloudFleetClient::Status CloudFleetClient::status() const {
   result.autoProvision = autoProvision_;
   result.updateAvailable = firmware_.updateAvailable;
   result.mandatory = firmware_.mandatory;
+  result.effectCount = effectCount_;
+  result.selectedEffectId = selectedEffectId_;
+  result.effectsUpdatedAt = effectsUpdatedAt_;
   result.lastCheckMs = lastCheckMs_;
   result.nextCheckMs = next > now ? next - now : 0;
   return result;
+}
+
+size_t CloudFleetClient::effectCount() const { return effectCount_; }
+
+const CloudFleetClient::EffectPreset* CloudFleetClient::effectAt(
+    size_t index) const {
+  return index < effectCount_ ? &effects_[index] : nullptr;
+}
+
+const CloudFleetClient::EffectPreset* CloudFleetClient::findEffect(
+    const String& id) const {
+  for (size_t index = 0; index < effectCount_; ++index) {
+    if (effects_[index].id == id) return &effects_[index];
+  }
+  return nullptr;
+}
+
+void CloudFleetClient::selectEffect(const String& id) {
+  selectedEffectId_ = id.substring(0, 40);
+  preferences_.putString("effect", selectedEffectId_);
 }
 
 void CloudFleetClient::buildIdentity() {

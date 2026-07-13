@@ -12,7 +12,7 @@
 </head>
 <body>
 <main>
-  <header><div><small>ESP32-S3 • ST7789 • 0.7.1 Cloud Fleet</small><h1>PC Screen</h1></div><span id="status">Đang kết nối…</span></header>
+  <header><div><small>ESP32-S3 • ST7789 • 0.8.0 Cloud Sync</small><h1>PC Screen</h1></div><span id="status">Đang kết nối…</span></header>
   <nav id="tabs">
     <button data-tab="dashboard" class="active">Dashboard</button><button data-tab="display">Màn hình</button><button data-tab="rgb">RGB</button><button data-tab="network">Internet & giờ</button><button data-tab="cloud">Cloud & thiết bị</button><button data-tab="assets">Hình ảnh</button><button data-tab="system">Hệ thống</button>
   </nav>
@@ -36,7 +36,7 @@
       <div class="button-row quick-display"><button id="screenOn" type="button">Bật màn hình</button><button id="screenOff" class="secondary" type="button">Tắt màn hình</button><button class="brightnessPreset secondary" data-value="25" type="button">25%</button><button class="brightnessPreset secondary" data-value="50" type="button">50%</button><button class="brightnessPreset secondary" data-value="75" type="button">75%</button><button class="brightnessPreset secondary" data-value="100" type="button">100%</button></div>
     </div>
     <div class="card"><h2>Giao diện và chuyển trang</h2>
-      <div class="form-grid"><label>Chủ đề<select id="theme"><option value="dark">Tối</option><option value="light">Sáng</option></select></label><label>Đổi trang thông số sau<input id="pageInterval" type="number" min="2" max="30" value="5"><span>giây</span></label><label>Hiển thị trang logo<input id="logoDuration" type="number" min="2" max="30" value="5"><span>giây</span></label></div>
+      <div class="form-grid"><label>Chủ đề<select id="theme"><option value="dark">Tối</option><option value="light">Sáng</option></select></label><label>Chiều màn hình<select id="screenRotation"><option value="0">0°</option><option value="1">90°</option><option value="2">180°</option><option value="3">270°</option></select></label><label>Đổi trang thông số sau<input id="pageInterval" type="number" min="2" max="30" value="5"><span>giây</span></label><label>Hiển thị trang logo<input id="logoDuration" type="number" min="2" max="30" value="5"><span>giây</span></label></div>
       <label class="check"><input id="autoRotate" type="checkbox" checked> Tự động luân phiên trang</label>
       <div class="checks"><label><input class="page" data-bit="1" type="checkbox" checked> Tổng quan</label><label><input class="page" data-bit="2" type="checkbox" checked> Nhiệt độ</label><label><input class="page" data-bit="4" type="checkbox" checked> Quạt</label><label><input class="page" data-bit="8" type="checkbox" checked> Hiệu năng</label><label><input class="page" data-bit="16" type="checkbox"> Logo khởi động</label></div>
       <p id="displayMessage" class="message"></p>
@@ -56,6 +56,7 @@
 
   <section id="network" class="tab"><div class="card">
     <h2>Internet và đồng bộ thời gian</h2><p>ESP32 vẫn giữ Wi‑Fi <code>PCScreen-Setup</code> trong khi kết nối router hoặc hotspot để lấy giờ NTP.</p>
+    <div class="wifi-scan"><button id="scanWifi" type="button">Quét Wi‑Fi gần đây</button><select id="wifiScanResults"><option value="">Bấm quét để chọn mạng</option></select><span id="wifiScanState">Chưa quét</span></div>
     <div class="form-grid"><label>Tên Wi‑Fi Internet<input id="wifiSsid" maxlength="32" autocomplete="off" placeholder="SSID router/hotspot"></label><label>Mật khẩu<input id="wifiPassword" type="password" maxlength="63" autocomplete="new-password" placeholder="Để trống nếu không đổi"></label><label>Múi giờ<select id="utcOffset"><option value="420">Việt Nam UTC+7</option><option value="480">UTC+8</option><option value="540">UTC+9</option><option value="0">UTC+0</option><option value="-300">UTC-5</option><option value="-480">UTC-8</option></select></label></div>
     <label class="check"><input id="clearWifiPassword" type="checkbox"> Xóa mật khẩu đã lưu (Wi‑Fi mở)</label>
     <div class="button-row"><button id="saveNetwork" type="button">Lưu và kết nối</button></div>
@@ -66,6 +67,8 @@
     <div class="card cloud-card">
       <div class="row"><div><h2>GitHub Cloud Fleet</h2><p>Bo đọc dữ liệu công khai qua HTTPS, không lưu token GitHub và không cần tài khoản trên ESP32.</p></div><span id="cloudPill" class="cloud-pill">Đang chờ Internet</span></div>
       <div class="cloud-identity"><span>Device ID<b id="cloudDeviceId">--</b></span><span>MAC Wi-Fi<b id="cloudMac">--</b></span><span>Kênh cập nhật<b id="cloudChannel">stable</b></span><span>Đăng ký quản trị<b id="cloudRegistered">--</b></span></div>
+      <div class="cloud-effects-head"><div><h3>Hiệu ứng và setup từ GitHub</h3><p>Danh sách được ESP32 tải từ <code>effects.json</code>, chuyển qua WebSocket và lưu lựa chọn sau khi áp dụng.</p></div><b id="cloudEffectCount">0 hiệu ứng</b></div>
+      <div id="cloudEffects" class="cloud-effects"><span class="empty-effect">Chưa đồng bộ hiệu ứng.</span></div>
       <div class="cloud-release"><div><small>Đang cài</small><strong id="cloudCurrentVersion">--</strong></div><i>→</i><div><small>Mới nhất</small><strong id="cloudLatestVersion">--</strong></div></div>
       <div class="button-row cloud-actions"><button id="cloudCheck" type="button">Kiểm tra bản cập nhật</button><button id="cloudInstall" type="button" disabled>Tải và cập nhật</button><a id="cloudConsole" class="button-link secondary" href="https://tienthanhdev.github.io/Screen-Tunring-PC-ESP32s3/" target="_blank" rel="noopener">Mở Cloud Console</a></div>
       <p id="cloudMessage" class="message">Tự kiểm tra sau khi Wi-Fi Internet kết nối.</p>
@@ -83,7 +86,7 @@
     <div class="card"><h2>Điều khiển hệ thống</h2><p>Trạng thái này được cập nhật qua REST và WebSocket mỗi giây.</p><div class="system-status"><span>Firmware <b id="systemFirmware">--</b></span><span>Thời gian chạy <b id="systemUptime">--</b></span><span>Flash <b id="systemFlash">--</b></span><span>LittleFS <b id="systemStorage">--</b></span><span>Heap trống <b id="systemHeap">--</b></span><span>Màn hình <b id="systemDisplay">--</b></span></div><div class="button-row system-actions"><button id="systemScreenOn" type="button">Bật màn hình</button><button id="systemScreenOff" class="secondary" type="button">Tắt màn hình</button><button id="restartDevice" class="danger" type="button">Khởi động lại ESP32</button></div><p id="systemMessage" class="message"></p></div>
     <div class="card ota-card"><h2>Nâng cấp firmware OTA</h2><p>Chỉ chọn file <code>.pcota</code>. Không tắt nguồn hoặc đóng trang trong khi cập nhật.</p><div class="ota-layout"><div class="ota-upload-panel"><label class="file-label">File firmware<input id="otaFile" type="file" accept=".pcota,application/octet-stream"></label><div class="ota-progress-row"><progress id="otaProgress" value="0" max="100"></progress><strong id="otaProgressText">0%</strong></div><div class="button-row"><button id="uploadOta">Bắt đầu cập nhật</button></div><p id="otaState" class="message">Sẵn sàng nhận firmware.</p></div><div id="otaAnimation" class="ota-animation" aria-hidden="true"><div class="ota-spinner"></div><strong id="otaAnimationText">Đang chờ firmware…</strong><span>Animation được đặt trong vùng riêng, không che nút điều khiển.</span></div></div></div>
   </section>
-  <footer>PCScreen firmware 0.7.1 • Cloud Fleet • WebSocket port 81</footer>
+  <footer>PCScreen firmware 0.8.0 • Cloud Sync • WebSocket port 81</footer>
 </main>
 <script src="/app.js"></script>
 </body></html>

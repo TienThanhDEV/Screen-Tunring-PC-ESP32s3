@@ -10,6 +10,7 @@ class UiSettings final {
 
   struct State {
     Theme theme;
+    uint8_t rotation;
     bool autoRotate;
     uint16_t pageIntervalSeconds;
     uint8_t pageMask;
@@ -25,6 +26,7 @@ class UiSettings final {
   void loop();
   State state() const;
   void setTheme(Theme theme);
+  void setRotation(uint8_t rotation);
   void setAutoRotate(bool enabled);
   void setPageInterval(uint16_t seconds);
   void setPageMask(uint8_t mask);
@@ -38,6 +40,7 @@ class UiSettings final {
  private:
   Preferences preferences_;
   Theme theme_ = Theme::Dark;
+  uint8_t rotation_ = 0;
   bool autoRotate_ = true;
   uint16_t pageIntervalSeconds_ = 5;
   uint8_t pageMask_ = 0x0F;

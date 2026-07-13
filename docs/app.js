@@ -102,6 +102,11 @@ function selectEffect(id) {
   $("#effectSpeed").value = effect.speed;
   $("#effectBrightness").value = effect.brightness;
   $("#effectPalette").value = effect.palette.join(", ");
+  $("#effectTheme").value = effect.display?.theme || "";
+  $("#effectRotation").value = effect.display?.rotation ?? "";
+  $("#effectPageInterval").value = effect.display?.pageInterval ?? "";
+  $("#effectPageMask").value = effect.display?.pageMask ?? "";
+  $("#effectAutoRotate").checked = effect.display?.autoRotate ?? true;
   $("#effectEnabled").checked = effect.enabled;
   $("#effectEditorTitle").textContent = effect.name;
   $("#speedValue").textContent = effect.speed;
@@ -173,6 +178,11 @@ function slugify(value) {
 
 function collectEffectForm() {
   const colors = $("#effectPalette").value.split(",").map(value => value.trim()).filter(value => /^#[0-9a-f]{6}$/i.test(value)).slice(0, 6);
+  const display = { autoRotate: $("#effectAutoRotate").checked };
+  if ($("#effectTheme").value) display.theme = $("#effectTheme").value;
+  if ($("#effectRotation").value !== "") display.rotation = Number($("#effectRotation").value);
+  if ($("#effectPageInterval").value) display.pageInterval = Number($("#effectPageInterval").value);
+  if ($("#effectPageMask").value) display.pageMask = Number($("#effectPageMask").value);
   return {
     id: $("#effectId").value || slugify($("#effectName").value),
     name: $("#effectName").value.trim(),
@@ -181,7 +191,8 @@ function collectEffectForm() {
     speed: Number($("#effectSpeed").value),
     brightness: Number($("#effectBrightness").value),
     palette: colors.length ? colors : ["#47E3AD"],
-    minimumFirmware: $("#effectMinFirmware").value.trim()
+    minimumFirmware: $("#effectMinFirmware").value.trim(),
+    display
   };
 }
 
@@ -355,7 +366,7 @@ function bindEvents() {
     markDirty("effects.json"); renderEffects(); selectEffect(effect.id); showToast("Đã lưu hiệu ứng vào bản nháp.");
   });
   $("#newEffectButton").addEventListener("click", () => {
-    state.selectedEffect = null; $("#effectForm").reset(); $("#effectId").value = ""; $("#effectName").value = "Hiệu ứng mới"; $("#effectMinFirmware").value = "0.6.0"; $("#effectSpeed").value = 40; $("#effectBrightness").value = 70; $("#effectPalette").value = "#47E3AD, #70A5FF"; $("#effectEditorTitle").textContent = "Hiệu ứng mới"; updateOrb(["#47E3AD", "#70A5FF"]); $("#effectName").focus();
+    state.selectedEffect = null; $("#effectForm").reset(); $("#effectId").value = ""; $("#effectName").value = "Hiệu ứng mới"; $("#effectMinFirmware").value = "0.8.0"; $("#effectSpeed").value = 40; $("#effectBrightness").value = 70; $("#effectPalette").value = "#47E3AD, #70A5FF"; $("#effectAutoRotate").checked = true; $("#effectEditorTitle").textContent = "Hiệu ứng mới"; updateOrb(["#47E3AD", "#70A5FF"]); $("#effectName").focus();
   });
   $("#deleteEffectButton").addEventListener("click", () => {
     if (!state.selectedEffect || !confirm("Xóa hiệu ứng đang chọn khỏi bản nháp?")) return;
@@ -376,7 +387,7 @@ function bindEvents() {
     const mac = normalizeMac(rawMac); if (!mac) { showToast("MAC phải có đúng 12 ký tự hex.", "error"); return; }
     if (state.devices.devices.some(device => normalizeMac(device.mac) === mac)) { showToast("MAC này đã có trong registry.", "error"); return; }
     const name = prompt("Tên dễ nhớ cho thiết bị:", `PC Screen ${state.devices.devices.length + 1}`) || `PC Screen ${state.devices.devices.length + 1}`;
-    state.devices.devices.push({ id: `PCSCREEN-${mac.replaceAll(":", "")}`, mac, name: name.trim(), board: "ESP32-S3 Super Mini", flashMB: 4, firmware: state.firmware.latestVersion || "0.7.0", channel: "stable", enabled: true });
+    state.devices.devices.push({ id: `PCSCREEN-${mac.replaceAll(":", "")}`, mac, name: name.trim(), board: "ESP32-S3 Super Mini", flashMB: 4, firmware: state.firmware.latestVersion || "0.8.0", channel: "stable", enabled: true });
     markDirty("devices.json"); renderDevices(); $("#deviceCount").textContent = state.devices.devices.length;
   });
 

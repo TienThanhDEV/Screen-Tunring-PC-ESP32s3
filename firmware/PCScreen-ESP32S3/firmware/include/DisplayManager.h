@@ -12,6 +12,7 @@ class DisplayManager final {
   DisplayManager(DisplayDevice& display, BootAssetManager& bootAsset,
                  const OtaStatus& otaStatus);
   bool begin();
+  void setRotation(uint8_t rotation);
   void showBoot();
   void showOtaAnimation(uint32_t now);
   void render(const TelemetryData& data, bool connected, const String& address,
@@ -25,6 +26,7 @@ class DisplayManager final {
   lgfx::LGFX_Sprite canvas_;
   uint8_t currentPage_ = 0;
   uint8_t activePage_ = 0xFF;
+  uint8_t rotation_ = 0;
   bool logoAvailable_ = false;
   uint32_t lastPageChangeMs_ = 0;
 

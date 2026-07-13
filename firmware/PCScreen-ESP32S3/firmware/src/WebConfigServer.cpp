@@ -13,7 +13,7 @@ namespace {
 constexpr uint8_t kOtaMagic[8] = {'P', 'C', 'S', 'O', 'T', 'A', '1', 0};
 constexpr size_t kOtaHeaderSize = 16;
 constexpr uint32_t kOtaFormatVersion = 1;
-constexpr char kBundledWebVersion[] = "0.7.1";
+constexpr char kBundledWebVersion[] = "0.8.0";
 
 extern const uint8_t kIndexHtmlStart[] asm("_binary_data_index_html_start");
 extern const uint8_t kIndexHtmlEnd[] asm("_binary_data_index_html_end");
@@ -76,6 +76,18 @@ bool hexToRgb565(const String& text, uint16_t& result) {
   const uint8_t green = (rgb >> 8U) & 0xFFU;
   const uint8_t blue = rgb & 0xFFU;
   result = ((red & 0xF8U) << 8U) | ((green & 0xFCU) << 3U) | (blue >> 3U);
+  return true;
+}
+
+bool hexToRgb888(const String& text, uint8_t& red, uint8_t& green,
+                 uint8_t& blue) {
+  if (text.length() != 7 || text[0] != '#') return false;
+  char* end = nullptr;
+  const uint32_t rgb = strtoul(text.c_str() + 1, &end, 16);
+  if (!end || *end != '\0') return false;
+  red = (rgb >> 16U) & 0xFFU;
+  green = (rgb >> 8U) & 0xFFU;
+  blue = rgb & 0xFFU;
   return true;
 }
 }  // namespace
@@ -147,8 +159,13 @@ void WebConfigServer::registerRoutes() {
   server_.on("/api/v1/ui", HTTP_PUT, [this]() { updateUiSettings(); });
   server_.on("/api/v1/network", HTTP_GET, [this]() { sendNetworkState(); });
   server_.on("/api/v1/network", HTTP_PUT, [this]() { updateNetwork(); });
+  server_.on("/api/v1/network/scan", HTTP_GET, [this]() { scanWifi(); });
   server_.on("/api/v1/system", HTTP_GET, [this]() { sendSystemState(); });
   server_.on("/api/v1/cloud", HTTP_GET, [this]() { sendCloudState(); });
+  server_.on("/api/v1/cloud/effects", HTTP_GET,
+             [this]() { sendCloudEffects(); });
+  server_.on("/api/v1/cloud/effects/apply", HTTP_POST,
+             [this]() { applyCloudEffectRequest(); });
   server_.on("/api/v1/cloud/check", HTTP_POST, [this]() { checkCloud(); });
   server_.on("/api/v1/cloud/update", HTTP_POST,
              [this]() { installCloudUpdate(); });
@@ -580,6 +597,7 @@ void WebConfigServer::sendUiSettings() {
   doc["dashboardTitle"] = state.dashboardTitle;
   doc["showDate"] = state.showDate;
   doc["cardRadius"] = state.cardRadius;
+  doc["rotation"] = state.rotation;
   JsonArray colors = doc["cardColors"].to<JsonArray>();
   for (const uint16_t color : state.cardColors) colors.add(rgb565ToHex(color));
   String body;
@@ -600,6 +618,14 @@ void WebConfigServer::updateUiSettings() {
       return;
     }
     settings_.setTheme(theme == "light" ? UiSettings::Theme::Light : UiSettings::Theme::Dark);
+  }
+  if (doc["rotation"].is<int>()) {
+    const int value = doc["rotation"].as<int>();
+    if (value < 0 || value > 3) {
+      server_.send(422, "application/json", "{\"error\":\"rotation_range\"}");
+      return;
+    }
+    settings_.setRotation(static_cast<uint8_t>(value));
   }
   if (doc["autoRotate"].is<bool>()) settings_.setAutoRotate(doc["autoRotate"].as<bool>());
   if (doc["pageInterval"].is<int>()) {
@@ -714,6 +740,38 @@ void WebConfigServer::updateNetwork() {
   sendNetworkState();
 }
 
+void WebConfigServer::scanWifi() {
+  const int count = WiFi.scanNetworks(false, true);
+  JsonDocument doc;
+  doc["type"] = "wifiScan";
+  JsonArray networks = doc["networks"].to<JsonArray>();
+  if (count >= 0) {
+    for (int index = 0; index < count && networks.size() < 20; ++index) {
+      const String ssid = WiFi.SSID(index);
+      if (ssid.isEmpty()) continue;
+      bool duplicate = false;
+      for (JsonObject existing : networks) {
+        if (String(existing["ssid"] | "") == ssid) {
+          duplicate = true;
+          break;
+        }
+      }
+      if (duplicate) continue;
+      JsonObject item = networks.add<JsonObject>();
+      item["ssid"] = ssid;
+      item["rssi"] = WiFi.RSSI(index);
+      item["channel"] = WiFi.channel(index);
+      item["secure"] = WiFi.encryptionType(index) != WIFI_AUTH_OPEN;
+    }
+  }
+  doc["count"] = networks.size();
+  WiFi.scanDelete();
+  String body;
+  serializeJson(doc, body);
+  socket_.broadcastTXT(body);
+  server_.send(count < 0 ? 503 : 200, "application/json", body);
+}
+
 void WebConfigServer::sendSystemState() {
   const auto backlight = backlight_.state();
   const auto network = network_.state();
@@ -754,8 +812,121 @@ void WebConfigServer::sendCloudState() {
   doc["mandatory"] = state.mandatory;
   doc["lastCheckMs"] = state.lastCheckMs;
   doc["nextCheckMs"] = state.nextCheckMs;
+  doc["effectCount"] = state.effectCount;
+  doc["selectedEffectId"] = state.selectedEffectId;
+  doc["effectsUpdatedAt"] = state.effectsUpdatedAt;
   String body;
   serializeJson(doc, body);
+  server_.send(200, "application/json", body);
+}
+
+void WebConfigServer::sendCloudEffects() {
+  server_.send(200, "application/json", cloudEffectsJson());
+}
+
+String WebConfigServer::cloudEffectsJson() const {
+  JsonDocument doc;
+  doc["type"] = "cloudEffects";
+  doc["selectedId"] = cloud_.status().selectedEffectId;
+  JsonArray effects = doc["effects"].to<JsonArray>();
+  for (size_t index = 0; index < cloud_.effectCount(); ++index) {
+    const auto* source = cloud_.effectAt(index);
+    if (!source) continue;
+    JsonObject effect = effects.add<JsonObject>();
+    effect["id"] = source->id;
+    effect["name"] = source->name;
+    effect["type"] = source->type;
+    effect["enabled"] = source->enabled;
+    effect["speed"] = source->speed;
+    effect["brightness"] = source->brightness;
+    JsonArray palette = effect["palette"].to<JsonArray>();
+    for (uint8_t color = 0; color < source->paletteSize; ++color)
+      palette.add(source->palette[color]);
+    JsonObject display = effect["display"].to<JsonObject>();
+    if (!source->theme.isEmpty()) display["theme"] = source->theme;
+    if (source->rotation >= 0) display["rotation"] = source->rotation;
+    if (source->autoRotate >= 0)
+      display["autoRotate"] = source->autoRotate == 1;
+    if (source->pageInterval >= 0)
+      display["pageInterval"] = source->pageInterval;
+    if (source->pageMask >= 0) display["pageMask"] = source->pageMask;
+  }
+  String body;
+  serializeJson(doc, body);
+  return body;
+}
+
+void WebConfigServer::broadcastCloudEffects(int client) {
+  String body = cloudEffectsJson();
+  if (client >= 0) socket_.sendTXT(static_cast<uint8_t>(client), body);
+  else socket_.broadcastTXT(body);
+}
+
+bool WebConfigServer::applyCloudEffect(const String& id, String& error) {
+  const auto* effect = cloud_.findEffect(id);
+  if (!effect) {
+    error = "effect_not_found";
+    return false;
+  }
+  if (!effect->enabled) {
+    error = "effect_disabled";
+    return false;
+  }
+  if (effect->type == "gradient" || effect->type == "rainbow")
+    rgb_.setEffect(RgbLedController::Effect::Rainbow);
+  else if (effect->type == "pulse")
+    rgb_.setEffect(RgbLedController::Effect::Pulse);
+  else if (effect->type == "temperature")
+    rgb_.setEffect(RgbLedController::Effect::Temperature);
+  else if (effect->type == "load")
+    rgb_.setEffect(RgbLedController::Effect::Load);
+  else if (effect->type == "solid")
+    rgb_.setEffect(RgbLedController::Effect::Solid);
+  else {
+    error = "effect_type_unsupported";
+    return false;
+  }
+  if (effect->paletteSize > 0) {
+    uint8_t red = 0, green = 0, blue = 0;
+    if (hexToRgb888(effect->palette[0], red, green, blue))
+      rgb_.setColor(red, green, blue);
+  }
+  rgb_.setBrightness(min<uint8_t>(effect->brightness,
+                                  AppConfig::RGB_MAX_SAFE_BRIGHTNESS));
+  rgb_.setSpeed(effect->speed);
+  rgb_.setEnabled(true);
+  if (effect->theme == "light") settings_.setTheme(UiSettings::Theme::Light);
+  else if (effect->theme == "dark") settings_.setTheme(UiSettings::Theme::Dark);
+  if (effect->rotation >= 0) settings_.setRotation(effect->rotation);
+  if (effect->autoRotate >= 0) settings_.setAutoRotate(effect->autoRotate == 1);
+  if (effect->pageInterval >= 0)
+    settings_.setPageInterval(effect->pageInterval);
+  if (effect->pageMask >= 0) settings_.setPageMask(effect->pageMask);
+  cloud_.selectEffect(effect->id);
+  broadcastCloudEffects();
+  return true;
+}
+
+void WebConfigServer::applyCloudEffectRequest() {
+  JsonDocument request;
+  if (deserializeJson(request, server_.arg("plain"))) {
+    server_.send(400, "application/json", "{\"error\":\"invalid_json\"}");
+    return;
+  }
+  String error;
+  if (!applyCloudEffect(String(request["id"] | ""), error)) {
+    JsonDocument response;
+    response["error"] = error;
+    String body;
+    serializeJson(response, body);
+    server_.send(422, "application/json", body);
+    return;
+  }
+  JsonDocument response;
+  response["ok"] = true;
+  response["selectedId"] = cloud_.status().selectedEffectId;
+  String body;
+  serializeJson(response, body);
   server_.send(200, "application/json", body);
 }
 
@@ -775,6 +946,7 @@ void WebConfigServer::checkCloud() {
     server_.send(502, "application/json", body);
     return;
   }
+  broadcastCloudEffects();
   sendCloudState();
 }
 
@@ -819,6 +991,7 @@ void WebConfigServer::handleWebSocketEvent(uint8_t client, WStype_t type,
   if (type == WStype_CONNECTED) {
     socket_.sendTXT(client, String("{\"type\":\"ready\",\"firmware\":\"") +
                                 AppConfig::FIRMWARE_VERSION + "\"}");
+    broadcastCloudEffects(client);
     return;
   }
   if (type != WStype_TEXT || !payload || length == 0) return;
@@ -846,6 +1019,17 @@ void WebConfigServer::handleWebSocketEvent(uint8_t client, WStype_t type,
         response["ok"] = false;
         response["error"] = "brightness_range";
       }
+    } else if (command == "syncCloud" && !otaStarted_) {
+      const bool ok = cloud_.checkNow();
+      response["ok"] = ok;
+      if (ok) broadcastCloudEffects();
+      else response["error"] = cloud_.status().lastError;
+    } else if (command == "applyCloudEffect" && request["id"].is<const char*>()) {
+      String error;
+      const bool ok = applyCloudEffect(request["id"].as<String>(), error);
+      response["ok"] = ok;
+      response["selectedId"] = cloud_.status().selectedEffectId;
+      if (!ok) response["error"] = error;
     } else if (command == "restart" && !otaStarted_) {
       response["ok"] = true;
       response["restarting"] = true;
@@ -861,6 +1045,13 @@ void WebConfigServer::handleWebSocketEvent(uint8_t client, WStype_t type,
 }
 
 void WebConfigServer::pushRealtime() {
+  const auto cloudState = cloud_.status();
+  if (cloudState.effectCount != lastBroadcastEffectCount_ ||
+      cloudState.effectsUpdatedAt != lastBroadcastEffectsUpdatedAt_) {
+    lastBroadcastEffectCount_ = cloudState.effectCount;
+    lastBroadcastEffectsUpdatedAt_ = cloudState.effectsUpdatedAt;
+    broadcastCloudEffects();
+  }
   JsonDocument doc;
   doc["type"] = "telemetry";
   doc["connected"] = telemetry_.isFresh(millis(), AppConfig::TELEMETRY_STALE_MS);

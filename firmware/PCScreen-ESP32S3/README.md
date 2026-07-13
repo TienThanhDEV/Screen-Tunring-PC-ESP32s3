@@ -2,6 +2,14 @@
 
 Firmware mẫu có cấu trúc module cho ESP32-S3 Super Mini flash 4 MB và TFT ST7789 1,54 inch 240×240. Có dashboard TFT, USB CDC JSON-lines, web dashboard, PWM backlight GPIO8, LED RGB onboard, upload hình khởi động, OTA một file và quản lý nhiều thiết bị qua GitHub Pages.
 
+## Firmware 0.8.0 — đồng bộ hiệu ứng GitHub, rotation và Wi‑Fi scan
+
+- ESP32 tải tối đa 8 hiệu ứng/setup từ `docs/data/effects.json` và chuyển danh sách về website cục bộ qua WebSocket.
+- Chọn **Áp dụng** để lưu hiệu ứng RGB, bảng màu, độ sáng, tốc độ và setup TFT tương ứng.
+- Setup cloud hỗ trợ theme, chiều màn hình 0°/90°/180°/270°, tự đổi trang, thời gian đổi trang và page mask.
+- Website cục bộ có nút quét tối đa 20 Wi‑Fi AP, hiển thị RSSI/bảo mật và chọn SSID trực tiếp.
+- Đồng bộ tự động theo chu kỳ hoặc thủ công bằng nút **Kiểm tra bản cập nhật**.
+
 ## Firmware 0.7.1 — màn hình tiến trình OTA 240×240
 
 - Thiết kế OTA mới theo mẫu: nền tối, khung bo tròn, vòng phần trăm xanh và thanh tiến trình.

@@ -51,6 +51,8 @@ class WebConfigServer final {
   uint32_t restartAtMs_ = 0;
   uint32_t lastWebSocketPushMs_ = 0;
   uint32_t lastOtaFrameMs_ = 0;
+  size_t lastBroadcastEffectCount_ = 0;
+  String lastBroadcastEffectsUpdatedAt_;
   std::function<void()> otaFrameCallback_;
   void registerRoutes();
   void sendBacklightState();
@@ -62,8 +64,14 @@ class WebConfigServer final {
   void updateUiSettings();
   void sendNetworkState();
   void updateNetwork();
+  void scanWifi();
   void sendSystemState();
   void sendCloudState();
+  void sendCloudEffects();
+  void broadcastCloudEffects(int client = -1);
+  String cloudEffectsJson() const;
+  bool applyCloudEffect(const String& id, String& error);
+  void applyCloudEffectRequest();
   void checkCloud();
   void installCloudUpdate();
   void restartSystem();

@@ -26,6 +26,13 @@ bool DisplayManager::begin() {
   return canvas_.createSprite(BoardConfig::TFT_WIDTH, BoardConfig::TFT_HEIGHT) != nullptr;
 }
 
+void DisplayManager::setRotation(uint8_t rotation) {
+  rotation &= 0x03U;
+  if (rotation_ == rotation) return;
+  rotation_ = rotation;
+  display_.setRotation(rotation_);
+}
+
 void DisplayManager::showBoot() {
   canvas_.fillScreen(TFT_BLACK);
   canvas_.fillCircle(120, 91, 44, 0x055D);
@@ -53,6 +60,7 @@ void DisplayManager::render(const TelemetryData& data, bool connected,
                             const UiSettings::State& settings,
                             const NetworkTimeManager::ClockSnapshot& clock,
                             uint32_t now) {
+  setRotation(settings.rotation);
   if (otaStatus_.visible(now)) {
     bootAsset_.endPlayback();
     activePage_ = 0xFF;

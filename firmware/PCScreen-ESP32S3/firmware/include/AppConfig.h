@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 namespace AppConfig {
-constexpr char FIRMWARE_VERSION[] = "0.7.1";
+constexpr char FIRMWARE_VERSION[] = "0.8.0";
 constexpr char CLOUD_DATA_BASE_URL[] =
     "https://tienthanhdev.github.io/Screen-Tunring-PC-ESP32s3/data";
 constexpr uint32_t CLOUD_FIRST_CHECK_DELAY_MS = 15000;

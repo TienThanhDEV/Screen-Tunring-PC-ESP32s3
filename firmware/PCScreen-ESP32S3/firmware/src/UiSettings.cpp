@@ -5,6 +5,7 @@
 bool UiSettings::begin() {
   if (!preferences_.begin("ui", false)) return false;
   theme_ = preferences_.getUChar("theme", 0) == 1 ? Theme::Light : Theme::Dark;
+  rotation_ = preferences_.getUChar("rotation", 0) & 0x03U;
   autoRotate_ = preferences_.getBool("rotate", true);
   pageIntervalSeconds_ = constrain(preferences_.getUShort("page_sec", 5), 2, 30);
   pageMask_ = preferences_.getUChar("pages", 0x0F) & 0x1F;
@@ -28,12 +29,13 @@ void UiSettings::loop() {
 }
 
 UiSettings::State UiSettings::state() const {
-  return {theme_, autoRotate_, pageIntervalSeconds_, pageMask_,
+  return {theme_, rotation_, autoRotate_, pageIntervalSeconds_, pageMask_,
           bootDurationSeconds_, logoPageDurationSeconds_, dashboardTitle_,
           showDate_, cardRadius_, cardColors_};
 }
 
 void UiSettings::setTheme(Theme theme) { theme_ = theme; markDirty(); }
+void UiSettings::setRotation(uint8_t rotation) { rotation_ = rotation & 0x03U; markDirty(); }
 void UiSettings::setAutoRotate(bool enabled) { autoRotate_ = enabled; markDirty(); }
 void UiSettings::setPageInterval(uint16_t seconds) { pageIntervalSeconds_ = constrain(seconds, 2, 30); markDirty(); }
 void UiSettings::setPageMask(uint8_t mask) { pageMask_ = mask & 0x1F; if (pageMask_ == 0) pageMask_ = 0x01; markDirty(); }
@@ -56,6 +58,7 @@ void UiSettings::markDirty() { dirty_ = true; changedAtMs_ = millis(); }
 
 void UiSettings::save() {
   preferences_.putUChar("theme", static_cast<uint8_t>(theme_));
+  preferences_.putUChar("rotation", rotation_);
   preferences_.putBool("rotate", autoRotate_);
   preferences_.putUShort("page_sec", pageIntervalSeconds_);
   preferences_.putUChar("pages", pageMask_);

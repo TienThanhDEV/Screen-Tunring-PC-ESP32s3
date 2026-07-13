@@ -93,7 +93,7 @@
           </article>
           <article class="release-card">
             <div class="release-top"><span class="pill success">Stable</span><span>ESP32-S3 · 4 MB</span></div>
-            <p>Firmware mới nhất</p><h3 id="currentVersion">v0.7.1</h3>
+            <p>Firmware mới nhất</p><h3 id="currentVersion">v0.8.0</h3>
             <div class="release-meta"><span><small>Kích thước</small><strong id="firmwareSize">1.2 MB</strong></span><span><small>Định dạng</small><strong>.pcota</strong></span></div>
             <button class="button full" data-go="firmware">Xem bản phát hành →</button>
           </article>
@@ -140,6 +140,9 @@
               <div class="range-field"><div><span>Tốc độ</span><strong id="speedValue">40</strong></div><input id="effectSpeed" type="range" min="1" max="100" value="40"></div>
               <div class="range-field"><div><span>Độ sáng</span><strong id="brightnessValue">70%</strong></div><input id="effectBrightness" type="range" min="1" max="100" value="70"></div>
               <label class="field"><span>Bảng màu, cách nhau bằng dấu phẩy</span><input id="effectPalette" value="#33D6FF, #6C5CFF, #FF4FD8"></label>
+              <div class="field-row"><label class="field"><span>Theme TFT</span><select id="effectTheme"><option value="">Không đổi</option><option value="dark">Tối</option><option value="light">Sáng</option></select></label><label class="field"><span>Xoay TFT</span><select id="effectRotation"><option value="">Không đổi</option><option value="0">0°</option><option value="1">90°</option><option value="2">180°</option><option value="3">270°</option></select></label></div>
+              <div class="field-row"><label class="field"><span>Đổi trang (giây)</span><input id="effectPageInterval" type="number" min="2" max="30" placeholder="Không đổi"></label><label class="field"><span>Page mask 1–31</span><input id="effectPageMask" type="number" min="1" max="31" placeholder="Không đổi"></label></div>
+              <label class="switch-row"><span><strong>Tự động luân phiên trang</strong><small>Lưu cùng setup hiệu ứng</small></span><input id="effectAutoRotate" type="checkbox" checked><i></i></label>
               <label class="switch-row"><span><strong>Kích hoạt hiệu ứng</strong><small>ESP32 sẽ nhận ở lần đồng bộ kế tiếp</small></span><input id="effectEnabled" type="checkbox"><i></i></label>
               <div class="form-actions"><button class="button danger" type="button" id="deleteEffectButton">Xóa</button><button class="button primary" type="submit">Lưu vào bản nháp</button></div>
             </form>
@@ -152,7 +155,7 @@
           <article class="panel">
             <div class="panel-head"><div><p class="eyebrow">OTA MANIFEST</p><h3>Bản phát hành ổn định</h3></div><span class="pill success">Ready</span></div>
             <form id="firmwareForm">
-              <div class="field-row three"><label class="field"><span>Phiên bản mới</span><input id="fwVersion" value="0.7.1"></label><label class="field"><span>Phiên bản tối thiểu</span><input id="fwMinVersion" value="0.5.0"></label><label class="field"><span>Kênh</span><select id="fwChannel"><option>stable</option><option>beta</option></select></label></div>
+              <div class="field-row three"><label class="field"><span>Phiên bản mới</span><input id="fwVersion" value="0.8.0"></label><label class="field"><span>Phiên bản tối thiểu</span><input id="fwMinVersion" value="0.5.0"></label><label class="field"><span>Kênh</span><select id="fwChannel"><option>stable</option><option>beta</option></select></label></div>
               <label class="field"><span>URL file .pcota trong GitHub Release</span><input id="fwUrl" type="url"></label>
               <div class="field-row"><label class="field"><span>SHA-256</span><input id="fwSha" minlength="64" maxlength="64"></label><label class="field"><span>Kích thước byte</span><input id="fwSize" type="number"></label></div>
               <label class="field"><span>Ghi chú phát hành, mỗi dòng một mục</span><textarea id="fwNotes" rows="6"></textarea></label>

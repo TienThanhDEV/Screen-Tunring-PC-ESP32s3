@@ -53,6 +53,7 @@ void setup() {
   if (!displayReady) {
     Serial.println("{\"type\":\"boot\",\"error\":\"display\"}");
   } else {
+    display.setRotation(uiSettings.state().rotation);
     display.showBoot();
   }
   web.setOtaFrameCallback([]() {
