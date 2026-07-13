@@ -5,7 +5,7 @@
   "generatedAt": "2026-07-14T00:55:00+07:00",
   "minimumPollSeconds": 900,
   "autoProvision": true,
-  "telemetryEndpoint": "",
+  "telemetryEndpoint": "https://pcscreen-device-api.tienthanhdev-pcscreen.workers.dev/api/v1/report",
   "identity": "wifi-station-mac",
   "endpoints": {
     "effects": "./effects.json",
