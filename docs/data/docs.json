@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "documents": [
+    {
+      "id": "install",
+      "title": "Cài đặt và nối dây",
+      "summary": "GPIO8–13, nguồn 3V3 và cách nạp firmware 4 MB.",
+      "url": "https://github.com/TienThanhDEV/Screen-Tunring-PC-ESP32s3#readme"
+    },
+    {
+      "id": "ota",
+      "title": "Cập nhật OTA",
+      "summary": "Quy trình phát hành, SHA-256 và khôi phục khi cập nhật lỗi.",
+      "url": "https://github.com/TienThanhDEV/Screen-Tunring-PC-ESP32s3/releases"
+    },
+    {
+      "id": "cloud",
+      "title": "PC Screen Cloud API",
+      "summary": "Cấu trúc manifest và cách ESP32 đọc dữ liệu từ GitHub Pages.",
+      "url": "./ESP32-CLOUD-INTEGRATION.md"
+    }
+  ]
+}
