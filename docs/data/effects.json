@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-07-13T23:45:00+07:00",
+  "effects": [
+    {
+      "id": "aurora-flow",
+      "name": "Aurora Flow",
+      "type": "gradient",
+      "enabled": true,
+      "speed": 42,
+      "brightness": 70,
+      "palette": ["#33D6FF", "#6C5CFF", "#FF4FD8"],
+      "minimumFirmware": "0.6.0"
+    },
+    {
+      "id": "temperature",
+      "name": "Temperature Sync",
+      "type": "temperature",
+      "enabled": true,
+      "speed": 20,
+      "brightness": 65,
+      "palette": ["#46E6A7", "#FFD166", "#FF5C7A"],
+      "minimumFirmware": "0.6.0"
+    },
+    {
+      "id": "quiet-pulse",
+      "name": "Quiet Pulse",
+      "type": "pulse",
+      "enabled": true,
+      "speed": 18,
+      "brightness": 35,
+      "palette": ["#78A9FF", "#A78BFA"],
+      "minimumFirmware": "0.6.0"
+    },
+    {
+      "id": "load-meter",
+      "name": "PC Load Meter",
+      "type": "load",
+      "enabled": false,
+      "speed": 30,
+      "brightness": 75,
+      "palette": ["#3AE6B0", "#FFB84D", "#FF5C7A"],
+      "minimumFirmware": "0.6.0"
+    }
+  ]
+}
