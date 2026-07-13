@@ -10,7 +10,7 @@
   "format": "pcota",
   "size": 1021424,
   "sha256": "39b4180e9ae8c2f61121a2855ecdce06768d1b7ce155e0c17ac46d360cbafd7f",
-  "downloadUrl": "https://github.com/TienThanhDEV/Screen-Tunring-PC-ESP32s3/releases/download/v0.6.0/PCScreen-S3-4MB-v0.6.0.pcota",
+  "downloadUrl": "https://github.com/TienThanhDEV/Screen-Tunring-PC-ESP32s3/releases/download/v0.6.0/PCScreen-S3-4MB-v0.6.0-CONTROLS-OTA.pcota",
   "releaseNotes": [
     "Giao diện Bento 240 × 240 rõ nét hơn",
     "Cập nhật OTA một tệp và animation riêng",
