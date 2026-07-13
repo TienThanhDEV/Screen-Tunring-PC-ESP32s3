@@ -1,16 +1,5 @@
 {
   "schemaVersion": 1,
   "note": "GitHub Pages chỉ cung cấp file tĩnh. Danh sách này là registry quản trị, không phải telemetry trực tiếp.",
-  "devices": [
-    {
-      "id": "PCSCREEN-S3-DEMO",
-      "mac": "00:00:00:00:00:00",
-      "name": "PC Screen bàn làm việc",
-      "board": "ESP32-S3 Super Mini",
-      "flashMB": 4,
-      "firmware": "0.7.0",
-      "channel": "stable",
-      "enabled": true
-    }
-  ]
+  "devices": []
 }
