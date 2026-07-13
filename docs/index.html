@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07100e">
+  <meta name="description" content="Bảng quản trị dữ liệu, hiệu ứng và firmware cho PCScreen ESP32-S3.">
+  <title>PCScreen Cloud Console</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient ambient-a"></div>
+  <div class="ambient ambient-b"></div>
+
+  <div class="login-screen" id="loginScreen">
+    <section class="login-card">
+      <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+      <p class="eyebrow">PCSCREEN CONTROL PLANE</p>
+      <h1>Cloud Console</h1>
+      <p class="login-copy">Quản lý hiệu ứng, manifest và bản cập nhật cho toàn bộ màn hình ESP32-S3 từ một nơi.</p>
+      <div class="security-note">
+        <strong>Quyền quản trị qua GitHub</strong>
+        <span>Token chỉ giữ trong bộ nhớ của tab này, không lưu vào source hay localStorage.</span>
+      </div>
+      <label class="field">
+        <span>Fine-grained personal access token</span>
+        <input id="tokenInput" type="password" autocomplete="off" placeholder="github_pat_••••••••••••">
+      </label>
+      <div class="login-actions">
+        <button class="button primary" id="connectButton">Kết nối quản trị</button>
+        <button class="button ghost" id="demoButton">Xem bản demo</button>
+      </div>
+      <p class="microcopy" id="loginMessage">Repo mặc định: TienThanhDEV/Screen-Tunring-PC-ESP32s3</p>
+    </section>
+  </div>
+
+  <div class="app-shell is-hidden" id="appShell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark small" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div><strong>PCScreen</strong><small>Cloud Console</small></div>
+      </div>
+      <nav class="nav" aria-label="Điều hướng chính">
+        <button class="nav-item active" data-tab="overview"><span>⌂</span>Tổng quan</button>
+        <button class="nav-item" data-tab="effects"><span>✦</span>Hiệu ứng</button>
+        <button class="nav-item" data-tab="firmware"><span>↟</span>Firmware</button>
+        <button class="nav-item" data-tab="devices"><span>▣</span>Thiết bị</button>
+        <button class="nav-item" data-tab="docs"><span>≡</span>Tài liệu</button>
+        <button class="nav-item" data-tab="settings"><span>⚙</span>Kết nối GitHub</button>
+      </nav>
+      <div class="sidebar-foot">
+        <span class="status-dot"></span>
+        <div><strong id="modeText">Chế độ demo</strong><small id="repoText">main / docs</small></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow" id="sectionEyebrow">CONTROL CENTER</p>
+          <h2 id="sectionTitle">Tổng quan hệ thống</h2>
+        </div>
+        <div class="top-actions">
+          <button class="icon-button" id="themeButton" aria-label="Đổi giao diện">◐</button>
+          <button class="button ghost compact" id="refreshButton">↻ Đồng bộ</button>
+          <button class="button primary compact" id="publishButton">Xuất bản thay đổi</button>
+        </div>
+      </header>
+
+      <div class="notice warning" id="demoNotice">
+        <span>!</span>
+        <div><strong>Đang ở chế độ xem thử</strong><p>Được phép chỉnh và tải JSON về máy. Muốn ghi thẳng vào GitHub, hãy kết nối token có quyền Contents: Read and write.</p></div>
+        <button id="openSettingsButton">Kết nối</button>
+      </div>
+
+      <section class="tab-panel active" id="tab-overview">
+        <div class="hero-grid">
+          <article class="hero-card">
+            <div class="hero-content">
+              <p class="eyebrow">FLEET STATUS</p>
+              <h3>Mọi màn hình.<br><em>Một nguồn dữ liệu.</em></h3>
+              <p>ESP32 kiểm tra manifest định kỳ, tải hiệu ứng mới và nhận đúng bản firmware dành cho board 4 MB.</p>
+              <div class="hero-actions"><button class="button primary" data-go="effects">Quản lý hiệu ứng</button><button class="button ghost" data-go="firmware">Kiểm tra OTA</button></div>
+            </div>
+            <div class="device-preview" aria-label="Mô phỏng màn hình PCScreen 240 x 240">
+              <div class="preview-screen">
+                <div class="preview-head"><strong>PCSCREEN</strong><span>23:48</span></div>
+                <div class="preview-grid"><div class="tile cyan"><small>CPU</small><b>54°</b></div><div class="tile mint"><small>GPU</small><b>61°</b></div><div class="tile pink"><small>RAM</small><b>42%</b></div><div class="tile amber"><small>FPS</small><b>144</b></div></div>
+                <div class="preview-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              </div>
+            </div>
+          </article>
+          <article class="release-card">
+            <div class="release-top"><span class="pill success">Stable</span><span>ESP32-S3 · 4 MB</span></div>
+            <p>Firmware mới nhất</p><h3 id="currentVersion">v0.6.0</h3>
+            <div class="release-meta"><span><small>Kích thước</small><strong id="firmwareSize">997.5 KB</strong></span><span><small>Định dạng</small><strong>.pcota</strong></span></div>
+            <button class="button full" data-go="firmware">Xem bản phát hành →</button>
+          </article>
+        </div>
+
+        <div class="stat-grid">
+          <article class="stat-card"><div class="stat-icon violet">✦</div><div><small>Hiệu ứng khả dụng</small><strong id="effectCount">4</strong><span>3 đang bật</span></div></article>
+          <article class="stat-card"><div class="stat-icon green">✓</div><div><small>Manifest</small><strong>Hợp lệ</strong><span id="manifestTime">vừa tải</span></div></article>
+          <article class="stat-card"><div class="stat-icon blue">▣</div><div><small>Thiết bị đăng ký</small><strong id="deviceCount">1</strong><span>ESP32-S3 / 4 MB</span></div></article>
+          <article class="stat-card"><div class="stat-icon orange">↻</div><div><small>Chu kỳ kiểm tra</small><strong>15 phút</strong><span>có cache an toàn</span></div></article>
+        </div>
+
+        <div class="content-grid">
+          <article class="panel">
+            <div class="panel-head"><div><p class="eyebrow">DATA PIPELINE</p><h3>Luồng phân phối</h3></div><span class="pill success">Online</span></div>
+            <div class="pipeline">
+              <div class="pipeline-node"><span>01</span><div><strong>Admin chỉnh dữ liệu</strong><small>Cloud Console + GitHub API</small></div></div>
+              <div class="pipeline-line"></div>
+              <div class="pipeline-node"><span>02</span><div><strong>GitHub Pages phát hành</strong><small>JSON qua HTTPS + cache</small></div></div>
+              <div class="pipeline-line"></div>
+              <div class="pipeline-node"><span>03</span><div><strong>ESP32 đồng bộ</strong><small>Đọc, xác thực rồi áp dụng</small></div></div>
+            </div>
+          </article>
+          <article class="panel activity-panel">
+            <div class="panel-head"><div><p class="eyebrow">CHECKLIST</p><h3>Trước khi phát hành</h3></div></div>
+            <ul class="check-list"><li class="done">JSON đúng schema</li><li class="done">Đúng board và flash 4 MB</li><li class="done">Có SHA-256 firmware</li><li>Thử OTA trên một thiết bị mẫu</li></ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-effects">
+        <div class="section-grid effects-layout">
+          <article class="panel">
+            <div class="panel-head"><div><p class="eyebrow">EFFECT LIBRARY</p><h3>Hiệu ứng RGB</h3></div><button class="button primary compact" id="newEffectButton">+ Thêm hiệu ứng</button></div>
+            <div class="effect-list" id="effectList"></div>
+          </article>
+          <article class="panel editor-panel">
+            <div class="panel-head"><div><p class="eyebrow">LIVE EDITOR</p><h3 id="effectEditorTitle">Chọn hiệu ứng</h3></div><span class="unsaved-dot" id="unsavedDot">Chưa lưu</span></div>
+            <div class="effect-orb" id="effectOrb"><span></span></div>
+            <form id="effectForm">
+              <input type="hidden" id="effectId">
+              <label class="field"><span>Tên hiển thị</span><input id="effectName" required maxlength="40"></label>
+              <div class="field-row"><label class="field"><span>Loại</span><select id="effectType"><option value="gradient">Gradient</option><option value="pulse">Pulse</option><option value="temperature">Temperature</option><option value="load">PC Load</option><option value="solid">Solid</option></select></label><label class="field"><span>Firmware tối thiểu</span><input id="effectMinFirmware" value="0.6.0"></label></div>
+              <div class="range-field"><div><span>Tốc độ</span><strong id="speedValue">40</strong></div><input id="effectSpeed" type="range" min="1" max="100" value="40"></div>
+              <div class="range-field"><div><span>Độ sáng</span><strong id="brightnessValue">70%</strong></div><input id="effectBrightness" type="range" min="1" max="100" value="70"></div>
+              <label class="field"><span>Bảng màu, cách nhau bằng dấu phẩy</span><input id="effectPalette" value="#33D6FF, #6C5CFF, #FF4FD8"></label>
+              <label class="switch-row"><span><strong>Kích hoạt hiệu ứng</strong><small>ESP32 sẽ nhận ở lần đồng bộ kế tiếp</small></span><input id="effectEnabled" type="checkbox"><i></i></label>
+              <div class="form-actions"><button class="button danger" type="button" id="deleteEffectButton">Xóa</button><button class="button primary" type="submit">Lưu vào bản nháp</button></div>
+            </form>
+          </article>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-firmware">
+        <div class="section-grid firmware-layout">
+          <article class="panel">
+            <div class="panel-head"><div><p class="eyebrow">OTA MANIFEST</p><h3>Bản phát hành ổn định</h3></div><span class="pill success">Ready</span></div>
+            <form id="firmwareForm">
+              <div class="field-row three"><label class="field"><span>Phiên bản mới</span><input id="fwVersion" value="0.6.0"></label><label class="field"><span>Phiên bản tối thiểu</span><input id="fwMinVersion" value="0.5.0"></label><label class="field"><span>Kênh</span><select id="fwChannel"><option>stable</option><option>beta</option></select></label></div>
+              <label class="field"><span>URL file .pcota trong GitHub Release</span><input id="fwUrl" type="url"></label>
+              <div class="field-row"><label class="field"><span>SHA-256</span><input id="fwSha" minlength="64" maxlength="64"></label><label class="field"><span>Kích thước byte</span><input id="fwSize" type="number"></label></div>
+              <label class="field"><span>Ghi chú phát hành, mỗi dòng một mục</span><textarea id="fwNotes" rows="6"></textarea></label>
+              <label class="switch-row"><span><strong>Bắt buộc cập nhật</strong><small>Chỉ bật khi bản cũ có lỗi nghiêm trọng</small></span><input id="fwMandatory" type="checkbox"><i></i></label>
+              <div class="form-actions end"><button class="button ghost" type="button" id="downloadFirmwareJson">Tải JSON</button><button class="button primary" type="submit">Lưu manifest</button></div>
+            </form>
+          </article>
+          <article class="panel ota-preview">
+            <p class="eyebrow">DEVICE EXPERIENCE</p><h3>Màn hình khi cập nhật</h3>
+            <div class="ota-device"><div class="ota-ring"><span>72%</span></div><strong>Đang cập nhật</strong><small>Không ngắt nguồn thiết bị</small><div class="ota-progress"><i></i></div></div>
+            <div class="safety-list"><span>✓ Kiểm tra board</span><span>✓ Kiểm tra kích thước</span><span>✓ Xác minh SHA-256</span><span>✓ Rollback khi lỗi</span></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="tab-panel" id="tab-devices">
+        <article class="panel">
+          <div class="panel-head"><div><p class="eyebrow">DEVICE REGISTRY</p><h3>Thiết bị được phép nhận cấu hình</h3></div><button class="button primary compact" id="addDeviceButton">+ Đăng ký thiết bị</button></div>
+          <div class="table-wrap"><table><thead><tr><th>Thiết bị</th><th>Phần cứng</th><th>Firmware</th><th>Kênh</th><th>Trạng thái</th></tr></thead><tbody id="deviceTable"></tbody></table></div>
+          <div class="notice info inline"><span>i</span><div><strong>Giới hạn của GitHub Pages</strong><p>Trang tĩnh không nhận heartbeat/telemetry từ ESP32. Registry này là danh sách cấu hình; để xem online/offline thời gian thực cần thêm API như Cloudflare Worker, Firebase hoặc Supabase.</p></div></div>
+        </article>
+      </section>
+
+      <section class="tab-panel" id="tab-docs">
+        <div class="docs-grid" id="docsGrid"></div>
+      </section>
+
+      <section class="tab-panel" id="tab-settings">
+        <div class="section-grid settings-layout">
+          <article class="panel">
+            <div class="panel-head"><div><p class="eyebrow">REPOSITORY</p><h3>Kết nối GitHub</h3></div><span class="pill" id="connectionPill">Chưa kết nối</span></div>
+            <form id="settingsForm">
+              <div class="field-row"><label class="field"><span>Chủ sở hữu</span><input id="repoOwner" value="TienThanhDEV"></label><label class="field"><span>Repository</span><input id="repoName" value="Screen-Tunring-PC-ESP32s3"></label></div>
+              <div class="field-row"><label class="field"><span>Nhánh</span><input id="repoBranch" value="main"></label><label class="field"><span>Thư mục Pages</span><input id="repoFolder" value="docs/data"></label></div>
+              <label class="field"><span>Fine-grained token</span><input id="settingsToken" type="password" autocomplete="off" placeholder="Không bao giờ lưu vào trình duyệt"></label>
+              <div class="form-actions end"><button class="button ghost" type="button" id="disconnectButton">Ngắt kết nối</button><button class="button primary" type="submit">Kiểm tra kết nối</button></div>
+            </form>
+          </article>
+          <article class="panel security-panel">
+            <div class="shield">✓</div><h3>Cấu hình token an toàn</h3>
+            <ol><li>Chọn fine-grained token.</li><li>Chỉ cấp quyền cho repository này.</li><li>Repository permissions → Contents: Read and write.</li><li>Đặt ngày hết hạn ngắn và thu hồi khi không dùng.</li></ol>
+            <p>Không commit token, không chụp màn hình token và không nhập token trên máy không tin cậy.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+  <div class="modal-backdrop is-hidden" id="modalBackdrop"><div class="modal"><button class="modal-close" id="modalClose">×</button><p class="eyebrow">PUBLISH REVIEW</p><h3>Xuất bản thay đổi</h3><p id="publishSummary">Các file JSON sẽ được ghi vào nhánh main.</p><div class="publish-files" id="publishFiles"></div><label class="field"><span>Nội dung commit</span><input id="commitMessage" value="Update PCScreen cloud data"></label><div class="form-actions end"><button class="button ghost" id="downloadAllButton">Tải bản nháp</button><button class="button primary" id="confirmPublishButton">Commit lên GitHub</button></div></div></div>
+  <script src="app.js" defer></script>
+</body>
+</html>
