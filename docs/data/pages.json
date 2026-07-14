@@ -1,32 +1,12 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-07-13T20:49:25.503Z",
-  "language": "en",
+  "updatedAt": "2026-07-14T15:00:00+07:00",
+  "language": "vi",
   "pages": [
-    {
-      "id": "overview",
-      "type": 0,
-      "enabled": true
-    },
-    {
-      "id": "temperature",
-      "type": 1,
-      "enabled": true
-    },
-    {
-      "id": "cooling",
-      "type": 2,
-      "enabled": true
-    },
-    {
-      "id": "performance",
-      "type": 3,
-      "enabled": true
-    },
-    {
-      "id": "boot-logo",
-      "type": 4,
-      "enabled": false
-    }
+    { "id": "overview", "type": 0, "enabled": true },
+    { "id": "temperature", "type": 1, "enabled": true },
+    { "id": "cooling", "type": 2, "enabled": true },
+    { "id": "performance", "type": 3, "enabled": true },
+    { "id": "boot-logo", "type": 4, "enabled": false }
   ]
 }

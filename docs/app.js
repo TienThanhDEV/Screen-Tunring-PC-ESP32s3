@@ -429,7 +429,7 @@ function bindEvents() {
     markDirty("effects.json"); renderEffects(); selectEffect(effect.id); showToast("Đã lưu hiệu ứng vào bản nháp.");
   });
   $("#newEffectButton").addEventListener("click", () => {
-    state.selectedEffect = null; $("#effectForm").reset(); $("#effectId").value = ""; $("#effectName").value = "Hiệu ứng mới"; $("#effectMinFirmware").value = "0.8.0"; $("#effectSpeed").value = 40; $("#effectBrightness").value = 70; $("#effectPalette").value = "#47E3AD, #70A5FF"; $("#effectAutoRotate").checked = true; $("#effectEditorTitle").textContent = "Hiệu ứng mới"; updateOrb(["#47E3AD", "#70A5FF"]); $("#effectName").focus();
+    state.selectedEffect = null; $("#effectForm").reset(); $("#effectId").value = ""; $("#effectName").value = "Hiệu ứng mới"; $("#effectMinFirmware").value = "1.5.0"; $("#effectSpeed").value = 40; $("#effectBrightness").value = 70; $("#effectPalette").value = "#47E3AD, #70A5FF"; $("#effectAutoRotate").checked = true; $("#effectEditorTitle").textContent = "Hiệu ứng mới"; updateOrb(["#47E3AD", "#70A5FF"]); $("#effectName").focus();
   });
   $("#deleteEffectButton").addEventListener("click", () => {
     if (!state.selectedEffect || !confirm("Xóa hiệu ứng đang chọn khỏi bản nháp?")) return;
@@ -450,7 +450,7 @@ function bindEvents() {
     const mac = normalizeMac(rawMac); if (!mac) { showToast("MAC phải có đúng 12 ký tự hex.", "error"); return; }
     if (state.devices.devices.some(device => normalizeMac(device.mac) === mac)) { showToast("MAC này đã có trong registry.", "error"); return; }
     const name = prompt("Tên dễ nhớ cho thiết bị:", `PC Screen ${state.devices.devices.length + 1}`) || `PC Screen ${state.devices.devices.length + 1}`;
-    state.devices.devices.push({ id: `PCSCREEN-${mac.replaceAll(":", "")}`, mac, name: name.trim(), board: "ESP32-S3 Super Mini", flashMB: 4, firmware: state.firmware.latestVersion || "0.8.0", channel: "stable", enabled: true });
+    state.devices.devices.push({ id: `PCSCREEN-${mac.replaceAll(":", "")}`, mac, name: name.trim(), board: "ESP32-S3 Super Mini", flashMB: 4, firmware: state.firmware.latestVersion || "1.5.0", channel: "stable", enabled: true });
     markDirty("devices.json"); renderDevices(); $("#deviceCount").textContent = state.devices.devices.length;
   });
 

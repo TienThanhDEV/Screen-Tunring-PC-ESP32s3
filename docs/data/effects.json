@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-07-14T02:05:00+07:00",
+  "updatedAt": "2026-07-14T15:00:00+07:00",
   "effects": [
     {
       "id": "aurora-flow",
@@ -9,19 +9,9 @@
       "enabled": true,
       "speed": 42,
       "brightness": 70,
-      "palette": [
-        "#33D6FF",
-        "#6C5CFF",
-        "#FF4FD8"
-      ],
-      "minimumFirmware": "0.8.0",
-      "display": {
-        "theme": "dark",
-        "rotation": 0,
-        "autoRotate": true,
-        "pageInterval": 5,
-        "pageMask": 31
-      }
+      "palette": ["#33D6FF", "#6C5CFF", "#FF4FD8"],
+      "minimumFirmware": "1.5.0",
+      "display": {"theme": "dark", "rotation": 0, "autoRotate": true, "pageInterval": 5, "pageMask": 31}
     },
     {
       "id": "temperature",
@@ -30,18 +20,9 @@
       "enabled": true,
       "speed": 20,
       "brightness": 65,
-      "palette": [
-        "#46E6A7",
-        "#FFD166",
-        "#FF5C7A"
-      ],
-      "minimumFirmware": "0.8.0",
-      "display": {
-        "theme": "dark",
-        "autoRotate": true,
-        "pageInterval": 5,
-        "pageMask": 15
-      }
+      "palette": ["#46E6A7", "#FFD166", "#FF5C7A"],
+      "minimumFirmware": "1.5.0",
+      "display": {"theme": "dark", "autoRotate": true, "pageInterval": 5, "pageMask": 15}
     },
     {
       "id": "quiet-pulse",
@@ -50,17 +31,9 @@
       "enabled": true,
       "speed": 18,
       "brightness": 35,
-      "palette": [
-        "#78A9FF",
-        "#A78BFA"
-      ],
-      "minimumFirmware": "0.8.0",
-      "display": {
-        "theme": "dark",
-        "autoRotate": true,
-        "pageInterval": 8,
-        "pageMask": 31
-      }
+      "palette": ["#78A9FF", "#A78BFA"],
+      "minimumFirmware": "1.5.0",
+      "display": {"theme": "dark", "autoRotate": true, "pageInterval": 8, "pageMask": 31}
     },
     {
       "id": "load-meter",
@@ -69,18 +42,9 @@
       "enabled": false,
       "speed": 30,
       "brightness": 75,
-      "palette": [
-        "#3AE6B0",
-        "#FFB84D",
-        "#FF5C7A"
-      ],
-      "minimumFirmware": "0.8.0",
-      "display": {
-        "theme": "light",
-        "autoRotate": true,
-        "pageInterval": 4,
-        "pageMask": 15
-      }
+      "palette": ["#3AE6B0", "#FFB84D", "#FF5C7A"],
+      "minimumFirmware": "1.5.0",
+      "display": {"theme": "light", "autoRotate": true, "pageInterval": 4, "pageMask": 15}
     }
   ]
 }
