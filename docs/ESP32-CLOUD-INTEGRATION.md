@@ -1,72 +1,30 @@
 # Kết nối ESP32-S3 với PCScreen Cloud
 
-## Endpoint sau khi bật GitHub Pages
+## GitHub Pages
+
+Firmware đọc các manifest công khai tại:
 
 ```text
 https://tienthanhdev.github.io/Screen-Tunring-PC-ESP32s3/data/device-manifest.json
 https://tienthanhdev.github.io/Screen-Tunring-PC-ESP32s3/data/effects.json
 https://tienthanhdev.github.io/Screen-Tunring-PC-ESP32s3/data/firmware-manifest.json
+https://tienthanhdev.github.io/Screen-Tunring-PC-ESP32s3/data/pages.json
 ```
 
-ESP32 chỉ thực hiện `GET` qua HTTPS. Không đưa GitHub token vào firmware.
+Không đưa GitHub token vào ESP32. Token chỉ được nhập tạm trong trang admin khi cần commit JSON và không được lưu vào localStorage.
 
-## Chu kỳ đồng bộ an toàn
+## An toàn và chu kỳ đồng bộ
 
-- Tải khi Wi-Fi vừa kết nối.
-- Sau đó kiểm tra mỗi 15–60 phút, không gọi mỗi vòng `loop()`.
-- Giữ cấu hình hợp lệ gần nhất trong NVS/LittleFS nếu Internet mất.
-- Chỉ chấp nhận `schemaVersion` mà firmware hiểu.
-- Kiểm tra `board`, `flashMB`, kích thước và SHA-256 trước OTA.
-- Không tự cài bản cập nhật bắt buộc nếu nguồn điện không ổn định.
-# Kết nối ESP32-S3 với PCScreen Cloud
+- Chờ Wi-Fi và đồng hồ NTP hợp lệ trước khi mở TLS.
+- Xác minh HTTPS bằng Mozilla CA bundle nhúng trong firmware; không dùng `setInsecure()`.
+- Kiểm tra theo chu kỳ tối thiểu 15 phút thay vì mỗi vòng lặp.
+- Chỉ chấp nhận schema, board, flash size, URL HTTPS, kích thước và SHA-256 hợp lệ.
+- PCOTA chỉ cập nhật application. Thay đổi bảng phân vùng yêu cầu FULL.bin qua USB.
 
-## Endpoint sau khi bật GitHub Pages
+## Telemetry thiết bị
 
-```text
-https://tienthanhdev.github.io/Screen-Tunring-PC-ESP32s3/data/device-manifest.json
-https://tienthanhdev.github.io/Screen-Tunring-PC-ESP32s3/data/effects.json
-https://tienthanhdev.github.io/Screen-Tunring-PC-ESP32s3/data/firmware-manifest.json
-```
+GitHub Pages là host tĩnh nên không nhận POST. Backend tùy chọn trong `cloudflare-worker/` nhận heartbeat đã giới hạn kích thước và lưu bản ghi đã lọc vào Workers KV. Danh sách thiết bị yêu cầu `ADMIN_KEY` được lưu bằng `wrangler secret`.
 
-ESP32 chỉ thực hiện `GET` qua HTTPS. Không đưa GitHub token vào firmware.
+Device ID/MAC hỗ trợ nhận diện, không phải xác thực mật mã. Nếu triển khai riêng tư, tắt `ALLOW_ANONYMOUS_REPORTS` và thêm khóa riêng theo thiết bị.
 
-## Chu kỳ đồng bộ an toàn
-
-- Tải khi Wi-Fi vừa kết nối.
-- Sau đó kiểm tra mỗi 15–60 phút, không gọi mỗi vòng `loop()`.
-- Giữ cấu hình hợp lệ gần nhất trong NVS/LittleFS nếu Internet mất.
-- Chỉ chấp nhận `schemaVersion` mà firmware hiểu.
-- Kiểm tra `board`, `flashMB`, kích thước và SHA-256 trước OTA.
-- Không tự cài bản cập nhật bắt buộc nếu nguồn điện không ổn định.
-
-## Thử mã mẫu
-
-Chép ba file trong `firmware-example/` vào project PlatformIO/Arduino, cài
-`ArduinoJson`, đổi Wi-Fi và URL GitHub Pages rồi mở Serial Monitor 115200.
-
-Mã mẫu dùng `setInsecure()` để bắt đầu nhanh. Bản phát hành thực tế phải cấu
-hình chứng thư CA với `WiFiClientSecure::setCACert()` hoặc dùng certificate
-bundle được cập nhật, nếu không thiết bị không xác thực danh tính máy chủ.
-
-## Giới hạn
-
-GitHub Pages là host tĩnh: ESP32 có thể tải manifest nhưng không thể gửi
-telemetry thời gian thực lên đó. Muốn hiển thị online/offline, nhiệt độ hoặc log
-từ xa cần một API nhận `POST` (Cloudflare Worker, Firebase, Supabase hoặc server
-riêng) và cơ chế xác thực từng thiết bị.
-
-## Thử mã mẫu
-
-Chép ba file trong `firmware-example/` vào project PlatformIO/Arduino, cài
-`ArduinoJson`, đổi Wi-Fi và URL GitHub Pages rồi mở Serial Monitor 115200.
-
-Mã mẫu dùng `setInsecure()` để bắt đầu nhanh. Bản phát hành thực tế phải cấu
-hình chứng thư CA với `WiFiClientSecure::setCACert()` hoặc dùng certificate
-bundle được cập nhật, nếu không thiết bị không xác thực danh tính máy chủ.
-
-## Giới hạn
-
-GitHub Pages là host tĩnh: ESP32 có thể tải manifest nhưng không thể gửi
-telemetry thời gian thực lên đó. Muốn hiển thị online/offline, nhiệt độ hoặc log
-từ xa cần một API nhận `POST` (Cloudflare Worker, Firebase, Supabase hoặc server
-riêng) và cơ chế xác thực từng thiết bị.
+Tác giả: **Nguyễn Tiến Thành** — GitHub **TienThanhDEV**.

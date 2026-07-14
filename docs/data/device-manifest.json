@@ -1,6 +1,8 @@
 {
   "schemaVersion": 1,
   "project": "PCScreen ESP32-S3",
+  "author": "Nguyễn Tiến Thành",
+  "github": "TienThanhDEV",
   "channel": "stable",
   "generatedAt": "2026-07-14T15:00:00+07:00",
   "minimumPollSeconds": 900,

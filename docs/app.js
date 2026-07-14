@@ -11,7 +11,7 @@ const state = {
   devices: { devices: [] },
   docs: { documents: [] },
   pages: { schemaVersion: 1, updatedAt: new Date().toISOString(), language: "vi", pages: [] },
-  language: "vi",
+  language: localStorage.getItem("pcscreen-language") === "en" ? "en" : "vi",
   worker: { url: "", adminKey: "" },
   liveDevices: [],
   selectedEffect: null
@@ -392,10 +392,12 @@ function bindEvents() {
   $("#themeButton").addEventListener("click", () => document.body.classList.toggle("light"));
   $("#languageButton").addEventListener("click", () => {
     state.language = state.language === "vi" ? "en" : "vi";
+    localStorage.setItem("pcscreen-language", state.language);
     document.documentElement.lang = state.language;
     $("#languageButton").textContent = state.language === "vi" ? "EN" : "VI";
     const vi = ["Tổng quan","Hiệu ứng","Trang hiển thị","Firmware","Thiết bị","Tài liệu","Kết nối GitHub"], en = ["Overview","Effects","Display pages","Firmware","Devices","Documentation","GitHub connection"];
     $$(".nav-item").forEach((node, index) => { const icon = node.querySelector("span")?.outerHTML || ""; node.innerHTML = `${icon}${(state.language === "vi" ? vi : en)[index]}`; });
+    if (window.PCScreenCloudI18n) window.PCScreenCloudI18n.apply(state.language);
     renderPages(); setTab($(".nav-item.active")?.dataset.tab || "overview");
   });
   $("#refreshButton").addEventListener("click", async () => { await loadData(); showToast("Đã đồng bộ lại dữ liệu công khai."); });
@@ -450,7 +452,7 @@ function bindEvents() {
     const mac = normalizeMac(rawMac); if (!mac) { showToast("MAC phải có đúng 12 ký tự hex.", "error"); return; }
     if (state.devices.devices.some(device => normalizeMac(device.mac) === mac)) { showToast("MAC này đã có trong registry.", "error"); return; }
     const name = prompt("Tên dễ nhớ cho thiết bị:", `PC Screen ${state.devices.devices.length + 1}`) || `PC Screen ${state.devices.devices.length + 1}`;
-    state.devices.devices.push({ id: `PCSCREEN-${mac.replaceAll(":", "")}`, mac, name: name.trim(), board: "ESP32-S3 Super Mini", flashMB: 4, firmware: state.firmware.latestVersion || "1.5.0", channel: "stable", enabled: true });
+    state.devices.devices.push({ id: `PCSCREEN-${mac.replaceAll(":", "")}`, mac, name: name.trim(), board: "ESP32-S3 Super Mini", flashMB: 4, firmware: state.firmware.latestVersion || "1.7.0", channel: "stable", enabled: true });
     markDirty("devices.json"); renderDevices(); $("#deviceCount").textContent = state.devices.devices.length;
   });
 
@@ -464,3 +466,10 @@ function bindEvents() {
 }
 
 bindEvents();
+if (state.language === "en") {
+  document.documentElement.lang = "en";
+  $("#languageButton").textContent = "VI";
+  const nav = ["Overview","Effects","Display pages","Firmware","Devices","Documentation","GitHub connection"];
+  $$(".nav-item").forEach((node,index)=>{const icon=node.querySelector("span")?.outerHTML||"";node.innerHTML=`${icon}${nav[index]}`});
+  if (window.PCScreenCloudI18n) window.PCScreenCloudI18n.apply("en");
+}

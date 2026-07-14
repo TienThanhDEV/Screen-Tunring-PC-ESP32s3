@@ -1,20 +1,21 @@
 {
   "schemaVersion": 1,
   "channel": "stable",
-  "latestVersion": "1.5.0",
-  "publishedAt": "2026-07-14T15:00:00+07:00",
+  "latestVersion": "1.7.0",
+  "publishedAt": "2026-07-14T22:45:55+07:00",
   "mandatory": false,
-  "minimumVersion": "1.0.0",
+  "minimumVersion": "1.6.0",
   "board": "esp32-s3-super-mini",
   "flashMB": 4,
   "format": "pcota",
-  "size": 1289952,
-  "sha256": "7823e265177c8f44d6d9957ada6bc07b80df707fd492947662db8f0e3d8ea3b3",
-  "downloadUrl": "https://github.com/TienThanhDEV/Screen-Tunring-PC-ESP32s3/releases/download/v1.5.0/PCScreen-S3-4MB-v1.5.0-SMOOTH.pcota",
+  "size": 1364976,
+  "sha256": "62cec1b93ed80dc81989618b1df2cc75a7e39d7a7c49477b31635721ca73784b",
+  "downloadUrl": "https://github.com/TienThanhDEV/Screen-Tunring-PC-ESP32s3/releases/download/v1.7.0/PCScreen-S3-4MB-v1.7.0.pcota",
   "releaseNotes": [
-    "Hiệu ứng chuyển trang Slide hoặc Rise với thời gian tinh chỉnh 180–900 ms",
-    "Làm mượt số liệu realtime, giảm giật số và giữ giao diện TFT nền đen rõ ràng",
-    "Web ESP32 responsive, chẩn đoán kết nối và đồng bộ đầy đủ tài nguyên sau OTA",
-    "Windows Agent 1.3.0 xác nhận gói hai chiều và tự kết nối lại khi USB mất phản hồi"
+    "Màn hình QR cấu hình Wi-Fi chỉ xuất hiện sau lần nạp USB sạch đầu tiên",
+    "Hiệu ứng CHÀO MỪNG hoặc WELCOME sau khi kết nối Wi-Fi thành công",
+    "Chuyển đổi trọn bộ Tiếng Việt và English trên TFT, web và Windows Agent",
+    "Windows Agent 1.5.0 gửi telemetry realtime không chờ ACK",
+    "Giữ giới hạn ảnh hoặc GIF khởi động đúng 1.200.000 byte"
   ]
 }

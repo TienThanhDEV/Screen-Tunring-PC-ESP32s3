@@ -1,0 +1,16 @@
+{
+  "name": "pcscreen-device-api",
+  "main": "src/index.js",
+  "compatibility_date": "2026-07-14",
+  "kv_namespaces": [
+    { "binding": "DEVICES" }
+  ],
+  "vars": {
+    "ADMIN_ORIGIN": "https://tienthanhdev.github.io",
+    "ALLOW_ANONYMOUS_REPORTS": "true"
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 0.1
+  }
+}

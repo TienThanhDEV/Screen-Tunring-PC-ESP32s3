@@ -1,0 +1,2 @@
+# Copy to .dev.vars for local development. Never commit the real value.
+ADMIN_KEY=replace-with-a-long-random-secret

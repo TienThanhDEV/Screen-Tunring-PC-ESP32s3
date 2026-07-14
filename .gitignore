@@ -1,0 +1,13 @@
+.DS_Store
+.pio/
+.vscode/
+**/bin/
+**/obj/
+**/node_modules/
+**/.wrangler/
+**/.dev.vars*
+!**/.dev.vars.example
+*.log
+*.tmp
+*.user
+github_pat_*

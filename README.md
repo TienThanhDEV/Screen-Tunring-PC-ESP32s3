@@ -1,184 +1,91 @@
-# PCScreen Cloud Admin — GitHub Pages
+# PCScreen ESP32-S3 — Public v1.7.0
 
-Website tĩnh dành cho quản trị viên quản lý hiệu ứng RGB, manifest firmware,
-registry thiết bị và tài liệu cho ESP32-S3 Super Mini 4 MB.
+Màn hình giám sát máy tính dùng **ESP32-S3 Super Mini 4 MB** và **TFT ST7789 1.54 inch 240×240**. Firmware nhận telemetry qua USB CDC, hiển thị các trang tổng quan/nhiệt độ/quạt/hiệu năng, cung cấp bảng điều khiển web, ảnh hoặc GIF khởi động, OTA một tệp và đồng bộ manifest từ GitHub Pages.
 
-## Website làm được gì
+**Tác giả:** Nguyễn Tiến Thành  
+**GitHub:** [TienThanhDEV](https://github.com/TienThanhDEV)
 
-- Giao diện quản trị responsive, dark/light.
-- Xem và chỉnh `effects.json`, preview màu và tốc độ.
-- Tạo `firmware-manifest.json`, kiểm tra phiên bản, URL HTTPS, size, SHA-256.
-- Registry thiết bị và danh mục tài liệu.
-- Chế độ demo: sửa rồi tải JSON về máy.
-- Chế độ admin: dùng GitHub Contents API để commit JSON thẳng vào repo.
-- Token chỉ nằm trong RAM của tab và bị xóa khi tải lại/đóng tab.
-- ESP32 đọc dữ liệu qua GitHub Pages bằng HTTPS, không cần token.
+## Cài nhanh
 
-## Giới hạn bảo mật cần hiểu
+- Bo chưa từng cài v1.7.0: dùng gói `installers/usb-flash` và nạp file `PCScreen-S3-4MB-v1.7.0-FULL.bin` tại offset `0x0`.
+- Bo đã có đúng bảng phân vùng v1.7.0: mở web ESP32 → **Hệ thống → Cập nhật OTA** và chọn `PCScreen-S3-4MB-v1.7.0.pcota`.
+- Windows: chạy một ứng dụng PCScreen Windows Agent. Ứng dụng tích hợp LibreHardwareMonitorLib, tự tìm cổng COM và gửi dữ liệu 250–5000 ms.
+- macOS Intel: mở `mac-agent/RUN_MAC_AGENT.command`; nếu cần nhiệt độ/quạt, cài helper AppleSMC từ mã nguồn bằng `INSTALL_SMC_HELPER.command`.
 
-GitHub Pages là website tĩnh công khai. HTML/CSS/JSON và dữ liệu đọc **không thể
-giữ riêng cho admin**. Bản này bảo vệ thao tác ghi bằng fine-grained GitHub PAT;
-người không có token chỉ xem/tải dữ liệu công khai. Không ghi token vào file,
-JavaScript, GitHub Secret, URL hoặc firmware.
+> **Bắt buộc nạp USB một lần khi chuyển từ v1.5.x trở xuống.** OTA chỉ thay ứng dụng, không thay bảng phân vùng. Dùng OTA trực tiếp từ bố cục cũ sẽ không tạo được vùng ảnh 1,2 MB mới.
 
-Nếu cần tài khoản admin thực sự, nhiều người dùng, audit log hoặc telemetry
-ESP32 thời gian thực, cần backend có OAuth/API. GitHub Pages một mình không làm
-được phần đó.
+Sau khi nạp mới, kết nối `PCScreen-Setup`, mật khẩu `pcscreen123`, rồi mở `http://192.168.4.1`.
 
-## Cấu trúc gói
+## Màn hình cài đặt lần đầu
 
-```text
-PCScreen-Cloud-Admin/
-├── docs/                         # tải nguyên thư mục này lên repo
-│   ├── index.html
-│   ├── styles.css
-│   ├── app.js
-│   ├── .nojekyll
-│   ├── assets/favicon.svg
-│   └── data/
-│       ├── device-manifest.json
-│       ├── effects.json
-│       ├── firmware-manifest.json
-│       ├── devices.json
-│       └── docs.json
-├── firmware-example/             # mã ESP32 đọc dữ liệu cloud
-├── app/                          # wrapper để kiểm tra build giao diện
-└── README.md
-```
+Sau khi nạp FULL và xóa flash, TFT hiển thị mã QR Wi-Fi cùng SSID `PCScreen-Setup`, mật khẩu `pcscreen123` và địa chỉ cấu hình. Quét QR hoặc kết nối thủ công, vào trang web và chọn Wi-Fi Internet. Khi kết nối thành công, thiết bị chạy **CHÀO MỪNG** hoặc **WELCOME** theo ngôn ngữ đã chọn rồi mới vào màn hình chính.
 
-## Cách 1 — Tải lên bằng Terminal trên macOS Intel
+Trạng thái này được lưu trong NVS. OTA giữ nguyên NVS nên không hiện lại màn hình cấu hình lần đầu. Khi nâng cấp từ bản cũ đã có SSID, firmware tự nhận diện là thiết bị đã cấu hình và giữ quy trình khởi động bình thường.
 
-Yêu cầu đã cài Git. Mở Terminal:
+Web ESP32, màn hình TFT và Windows Agent hỗ trợ chuyển đổi trọn bộ **Tiếng Việt/English**. Windows Agent lưu ngôn ngữ và tự khởi động lại một lần để đồng bộ toàn bộ cửa sổ, menu khay và thông báo.
 
-```bash
-cd ~/Downloads
-git clone https://github.com/TienThanhDEV/Screen-Tunring-PC-ESP32s3.git
-cd Screen-Tunring-PC-ESP32s3
-```
+## Nối dây
 
-Chép thư mục `docs` và `firmware-example` của gói này vào repository, sau đó:
+| TFT ST7789 | ESP32-S3 Super Mini |
+|---|---:|
+| VCC | 3V3 |
+| GND | GND |
+| SCL/SCK | GPIO13 |
+| SDA/MOSI | GPIO12 |
+| RST | GPIO11 |
+| DC | GPIO10 |
+| CS | GPIO9 |
+| BL | GPIO8 trực tiếp* |
 
-```bash
-git add docs firmware-example
-git commit -m "Add PCScreen Cloud Admin"
-git push origin main
-```
+\* Cấu hình này dành cho module 1.54TFT-SPI-ST7789 Ver 1.1 có transistor đệm BL như hình phần cứng của dự án. Với module khác, phải kiểm tra dòng BL trước khi nối trực tiếp GPIO.
 
-Nếu GitHub hỏi đăng nhập, dùng GitHub Desktop hoặc PAT; mật khẩu tài khoản GitHub
-không dùng thay cho token trên Git HTTPS.
+## Bố cục flash 4 MB
 
-Trong gói cũng có `UPLOAD-TO-GITHUB-MAC.command`: nhấp đúp, nhập đường dẫn repo
-đã clone, xem danh sách thay đổi rồi gõ `yes` để commit/push. Script luôn hỏi xác
-nhận và không tự lưu token.
+| Vùng | Offset | Dung lượng |
+|---|---:|---:|
+| NVS | `0x9000` | 20 KiB |
+| OTA data | `0xE000` | 8 KiB |
+| Firmware A | `0x10000` | 1,441,792 byte |
+| Firmware B | `0x170000` | 1,441,792 byte |
+| LittleFS/ảnh | `0x2D0000` | 1,245,184 byte |
 
-## Cách 2 — Tải lên bằng website GitHub
+Ảnh/GIF khởi động bị giới hạn chính xác **1.200.000 byte**. Giao diện quản trị được nhúng trong firmware và không chiếm LittleFS; phần chênh còn lại dành cho metadata hệ thống file.
 
-1. Mở repo `TienThanhDEV/Screen-Tunring-PC-ESP32s3`.
-2. Chọn **Add file → Upload files**.
-3. Kéo thư mục `docs` vào, xác nhận cấu trúc là `docs/index.html` và
-   `docs/data/*.json`.
-4. Commit vào nhánh `main`.
+## Cấu trúc repository
 
-Terminal/GitHub Desktop đáng tin cậy hơn khi upload cả cây thư mục.
+- `firmware/`: PlatformIO/C++, LovyanGFX, webserver và OTA.
+- `windows-agent/`: WinForms .NET 8, LibreHardwareMonitorLib, system tray.
+- `mac-agent/`: Python agent + AppleSMC helper nguồn mở cho macOS Intel.
+- `docs/`: GitHub Pages quản lý manifest, hiệu ứng, trang và thiết bị.
+- `cloudflare-worker/`: API thiết bị dùng Workers KV.
+- `installers/usb-flash/`: bộ nạp USB macOS/Windows.
+- `release-assets/`: BIN, PCOTA, checksum và báo cáo build.
 
-## Bật GitHub Pages
-
-1. Trong repo chọn **Settings → Pages**.
-2. Ở **Build and deployment**, Source chọn **Deploy from a branch**.
-3. Branch chọn `main`, folder chọn `/docs`, nhấn **Save**.
-4. Chờ workflow Pages hoàn tất rồi mở:
-
-```text
-https://tienthanhdev.github.io/Screen-Tunring-PC-ESP32s3/
-```
-
-Tài liệu chính thức: [Configuring a publishing source](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
-
-## Tạo token quản trị tối thiểu
-
-1. GitHub avatar → **Settings → Developer settings**.
-2. **Personal access tokens → Fine-grained tokens → Generate new token**.
-3. Resource owner: tài khoản `TienThanhDEV`.
-4. Repository access: **Only select repositories** →
-   `Screen-Tunring-PC-ESP32s3`.
-5. Repository permissions: **Contents → Read and write**; Metadata để mặc định
-   read-only.
-6. Đặt ngày hết hạn ngắn, tạo token và sao chép một lần.
-7. Mở Cloud Console, dán token, nhấn **Kết nối quản trị**.
-
-Token không được lưu lại. Refresh trang sẽ phải nhập lại. Có thể thu hồi token
-ngay khi quản trị xong. Tài liệu: [Managing personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) và [Repository Contents API](https://docs.github.com/en/rest/repos/contents).
-
-## Đưa firmware `.pcota` lên GitHub Release
-
-Không đặt firmware lớn trong thư mục Pages. Trong repo:
-
-1. Mở **Releases → Draft a new release**.
-2. Tag `v0.6.0`, tiêu đề `PCScreen v0.6.0`.
-3. Upload `PCScreen-S3-4MB-v0.6.0.pcota`.
-4. Publish release.
-5. Sao chép URL tải file vào tab **Firmware**.
-6. Tính SHA-256 trên macOS:
+## Build
 
 ```bash
-shasum -a 256 PCScreen-S3-4MB-v0.6.0.pcota
-stat -f %z PCScreen-S3-4MB-v0.6.0.pcota
+cd firmware
+pio run -e esp32-s3-super-mini-4mb
+python3 tools/make_ota.py .pio/build/esp32-s3-super-mini-4mb/firmware.bin ../release-assets/PCScreen-S3-4MB-v1.7.0.pcota
 ```
 
-7. Nhập hash 64 ký tự và kích thước byte, lưu manifest, thử trên một board mẫu.
+Windows Agent được build bằng `windows-agent/BUILD_EXE_WINDOWS.bat`, hoặc tự động bằng GitHub Actions. Xem hướng dẫn riêng trong từng thư mục.
 
-Tài liệu: [Managing releases](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository).
+macOS Agent dùng Python 3 có sẵn từ Apple Command Line Tools và pySerial đi kèm, không cần `pip install cryptography` hay tải package từ Internet.
 
-## Kết nối ESP32-S3
+## Những gì đã xác minh
 
-URL dữ liệu mặc định:
+- Firmware PlatformIO build thành công cho ESP32-S3 4 MB.
+- Bảng phân vùng không chồng lấn và kết thúc đúng trong 4 MB.
+- Gói PCOTA có magic, kích thước payload và SHA-256 hợp lệ.
+- JavaScript/JSON/Cloudflare Worker đã qua kiểm tra cú pháp; workflow đã được kiểm tra cấu trúc.
+- Mã C# đã qua kiểm tra tĩnh. GitHub Actions build EXE trên Windows; môi trường macOS hiện tại không thể xác minh driver/PawnIO và cảm biến thực tế.
+- macOS Agent đã qua `py_compile`, script Zsh đã kiểm tra cú pháp và helper AppleSMC biên dịch sạch bằng Clang `-Werror` thành Mach-O x86_64.
 
-```text
-https://tienthanhdev.github.io/Screen-Tunring-PC-ESP32s3/data
-```
+Chưa thể xác minh tự động màu/offset của từng lô TFT, dòng điện chân BL, độ mượt trên bo thật, Wi-Fi thực, AppleSMC có quyền trên đúng model Mac và những sensor mà mainboard/GPU cụ thể công bố. Hãy kiểm tra phần cứng trước khi lắp cố định.
 
-Chép `firmware-example/CloudDataClient.h` và `.cpp` vào firmware chính, hoặc mở
-`GitHubCloudExample.ino`. Cần Arduino-ESP32 3.x và ArduinoJson 7.x.
+## Bảo mật
 
-Nguyên tắc:
+Không commit GitHub PAT, Cloudflare token hoặc `ADMIN_KEY`. Nếu một token từng xuất hiện trong chat/log, hãy thu hồi và tạo token mới. Xem [SECURITY.md](SECURITY.md).
 
-- ESP32 chỉ gọi `GET`, tuyệt đối không có GitHub token.
-- Poll tối thiểu 15 phút và giữ bản cấu hình hợp lệ gần nhất.
-- Chỉ áp dụng schema hỗ trợ.
-- OTA phải kiểm tra board `esp32-s3-super-mini`, flash 4 MB, size và SHA-256.
-- Mã mẫu dùng `setInsecure()` cho thử nghiệm. Bản sản phẩm cần CA certificate.
-
-Chi tiết: [docs/ESP32-CLOUD-INTEGRATION.md](docs/ESP32-CLOUD-INTEGRATION.md).
-
-## Cập nhật dữ liệu
-
-1. Mở Cloud Console và kết nối token.
-2. Chỉnh hiệu ứng hoặc firmware.
-3. Nhấn **Xuất bản thay đổi**.
-4. Xem danh sách file và commit lên GitHub.
-5. Chờ Pages build. ESP32 nhận dữ liệu ở chu kỳ kế tiếp.
-
-Nếu không muốn nhập token trong trình duyệt, dùng **Xem bản demo**, chỉnh dữ
-liệu, tải JSON rồi tự chép vào `docs/data` và `git push`.
-
-## Kiểm tra cục bộ
-
-Không mở trực tiếp `index.html` bằng `file://` vì trình duyệt có thể chặn fetch
-JSON. Chạy HTTP server:
-
-```bash
-cd docs
-python3 -m http.server 8080
-```
-
-Mở `http://localhost:8080`, chọn **Xem bản demo**.
-
-Trên macOS có thể nhấp đúp `PREVIEW-MAC.command` để làm hai bước này tự động.
-
-## Những phần chưa thể xác minh bằng phần cứng
-
-- Không có quyền push vào repo của người dùng nên gói chưa được xuất bản thật.
-- Chưa thử HTTPS/JSON trên ESP32-S3 vật lý trong môi trường này.
-- Chưa thực hiện OTA cloud trên board; bắt buộc thử với một thiết bị trước khi
-  bật `mandatory`.
-- GitHub Pages không nhận telemetry, heartbeat hay log từ thiết bị.
+Mã nguồn của dự án được phát hành theo giấy phép MIT. Các thư viện bên thứ ba giữ giấy phép riêng; xem [THIRD_PARTY.md](THIRD_PARTY.md).

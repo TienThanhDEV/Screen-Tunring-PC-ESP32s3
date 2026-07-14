@@ -95,7 +95,7 @@
           </article>
           <article class="release-card">
             <div class="release-top"><span class="pill success">Stable</span><span>ESP32-S3 · 4 MB</span></div>
-            <p>Firmware mới nhất</p><h3 id="currentVersion">v1.5.0</h3>
+            <p>Firmware mới nhất</p><h3 id="currentVersion">v1.7.0</h3>
             <div class="release-meta"><span><small>Kích thước</small><strong id="firmwareSize">1.2 MB</strong></span><span><small>Định dạng</small><strong>.pcota</strong></span></div>
             <button class="button full" data-go="firmware">Xem bản phát hành →</button>
           </article>
@@ -157,7 +157,7 @@
           <article class="panel">
             <div class="panel-head"><div><p class="eyebrow">OTA MANIFEST</p><h3>Bản phát hành ổn định</h3></div><span class="pill success">Ready</span></div>
             <form id="firmwareForm">
-              <div class="field-row three"><label class="field"><span>Phiên bản mới</span><input id="fwVersion" value="1.5.0"></label><label class="field"><span>Phiên bản tối thiểu</span><input id="fwMinVersion" value="1.0.0"></label><label class="field"><span>Kênh</span><select id="fwChannel"><option>stable</option><option>beta</option></select></label></div>
+              <div class="field-row three"><label class="field"><span>Phiên bản mới</span><input id="fwVersion" value="1.7.0"></label><label class="field"><span>Phiên bản tối thiểu</span><input id="fwMinVersion" value="1.0.0"></label><label class="field"><span>Kênh</span><select id="fwChannel"><option>stable</option><option>beta</option></select></label></div>
               <label class="field"><span>URL file .pcota trong GitHub Release</span><input id="fwUrl" type="url"></label>
               <div class="field-row"><label class="field"><span>SHA-256</span><input id="fwSha" minlength="64" maxlength="64"></label><label class="field"><span>Kích thước byte</span><input id="fwSize" type="number"></label></div>
               <label class="field"><span>Ghi chú phát hành, mỗi dòng một mục</span><textarea id="fwNotes" rows="6"></textarea></label>
@@ -193,7 +193,7 @@
         <article class="panel">
           <div class="panel-head"><div><p class="eyebrow">DEVICE REGISTRY</p><h3>Thiết bị được phép nhận cấu hình</h3></div><button class="button primary compact" id="addDeviceButton">+ Đăng ký thiết bị</button></div>
           <div class="table-wrap"><table><thead><tr><th>Thiết bị / MAC</th><th>Phần cứng</th><th>Firmware</th><th>Kênh</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody id="deviceTable"></tbody></table></div>
-          <div class="notice info inline"><span>✓</span><div><strong>Tự liên kết không cần xác thực</strong><p>Sau khi nạp firmware và nhập Wi-Fi, ESP32 tự tạo Device ID từ MAC rồi đọc registry/manifest công khai. Không dán GitHub token vào thiết bị.</p></div></div>
+          <div class="notice info inline"><span>✓</span><div><strong>Tự nhận diện bằng Device ID</strong><p>Sau khi nạp firmware và nhập Wi-Fi, ESP32 tạo Device ID từ MAC rồi đọc registry/manifest công khai. Device ID hỗ trợ quản lý, không thay thế xác thực mật mã. Không dán GitHub token vào thiết bị.</p></div></div>
           <div class="notice info inline"><span>i</span><div><strong>Giới hạn của GitHub Pages</strong><p>Trang tĩnh không nhận heartbeat/telemetry từ ESP32. Registry này là danh sách cấu hình; để xem online/offline thời gian thực cần thêm API như Cloudflare Worker, Firebase hoặc Supabase.</p></div></div>
         </article>
       </section>
@@ -225,8 +225,10 @@
     </main>
   </div>
 
+  <footer class="app-footer"><strong>PCScreen Public v1.7.0</strong><span>Phát triển bởi Nguyễn Tiến Thành</span><a href="https://github.com/TienThanhDEV" target="_blank" rel="noopener">GitHub @TienThanhDEV</a></footer>
   <div class="toast-stack" id="toastStack" aria-live="polite"></div>
   <div class="modal-backdrop is-hidden" id="modalBackdrop"><div class="modal"><button class="modal-close" id="modalClose">×</button><p class="eyebrow">PUBLISH REVIEW</p><h3>Xuất bản thay đổi</h3><p id="publishSummary">Các file JSON sẽ được ghi vào nhánh main.</p><div class="publish-files" id="publishFiles"></div><label class="field"><span>Nội dung commit</span><input id="commitMessage" value="Update PCScreen cloud data"></label><div class="form-actions end"><button class="button ghost" id="downloadAllButton">Tải bản nháp</button><button class="button primary" id="confirmPublishButton">Commit lên GitHub</button></div></div></div>
+  <script src="i18n.js" defer></script>
   <script src="app.js" defer></script>
 </body>
 </html>

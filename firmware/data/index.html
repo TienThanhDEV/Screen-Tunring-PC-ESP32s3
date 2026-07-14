@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="vi" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Bảng điều khiển chính thức cho thiết bị PCScreen ESP32-S3.">
+  <title>PCScreen MI50 — Control Center</title>
+  <link rel="stylesheet" href="/v4.css">
+  <link rel="stylesheet" href="/ota-animation.css">
+  <link rel="stylesheet" href="/crop-theme.css">
+  <link rel="stylesheet" href="/v5.css">
+  <link rel="stylesheet" href="/v6.css">
+</head>
+<body>
+<main>
+  <header><div><small>ESP32-S3 • ST7789 240×240 • Firmware 1.7.0</small><h1>PCScreen MI50 Control Center</h1></div><span id="status">Đang kết nối…</span></header>
+  <nav id="tabs">
+    <button data-tab="dashboard" class="active">Tổng quan</button><button data-tab="display">Màn hình & bố cục</button><button data-tab="typography">Kiểu chữ</button><button data-tab="rgb">Đèn RGB</button><button data-tab="network">Kết nối & thời gian</button><button data-tab="cloud">Cập nhật trực tuyến</button><button data-tab="assets">Ảnh khởi động</button><button data-tab="system">Hệ thống</button>
+  </nav>
+
+  <section id="dashboard" class="tab active">
+    <div id="connectionGuide" class="card connection-guide"><div><span class="eyebrow">KẾT NỐI MÁY TÍNH</span><h2 id="connectionGuideTitle">Đang chờ Windows Agent</h2><p id="connectionGuideText">Cắm cáp USB dữ liệu, mở PCScreen Windows Agent và chọn đúng cổng COM. Thẻ này tự ẩn khi nhận được dữ liệu.</p></div><div class="connection-actions"><button id="copyDiagnostics" class="secondary" type="button">Sao chép chẩn đoán</button><span id="diagnosticMessage"></span></div></div>
+    <div class="grid metrics">
+      <article><label>CPU</label><strong id="cpuTemp">--°C</strong><span id="cpuLoad">--% tải</span></article>
+      <article><label>GPU</label><strong id="gpuTemp">--°C</strong><span id="gpuLoad">--% tải</span></article>
+      <article><label>QUẠT CPU</label><strong id="cpuFan">--</strong><span>vòng/phút</span></article>
+      <article><label>QUẠT GPU</label><strong id="gpuFan">--</strong><span>vòng/phút</span></article>
+      <article><label>RAM</label><strong id="ramLoad">--%</strong><span>đang sử dụng</span></article>
+      <article><label>FPS</label><strong id="fps">--</strong><span>khung hình/giây</span></article>
+      <article><label>Ổ ĐĨA</label><strong id="diskLoad">--%</strong><span>đã sử dụng</span></article>
+      <article><label>TẢI XUỐNG</label><strong id="networkDown">--</strong><span>Mbps</span></article>
+      <article><label>TẢI LÊN</label><strong id="networkUp">--</strong><span>Mbps</span></article>
+      <article><label>THỜI GIAN HOẠT ĐỘNG</label><strong id="macUptime">--</strong><span>máy tính</span></article>
+    </div>
+    <div class="card"><h2>Tần suất cập nhật dữ liệu</h2><p>Chọn tốc độ phù hợp giữa độ mượt và mức sử dụng tài nguyên của máy tính.</p><div class="form-grid"><label>Chế độ<select id="telemetryMode"><option value="250">Thời gian thực • 250 ms</option><option value="500">Nhanh • 500 ms</option><option value="1000">Cân bằng • 1 giây</option><option value="2000">Tiết kiệm • 2 giây</option><option value="custom">Tùy chỉnh</option></select></label><label>Khoảng thời gian <span><b id="telemetryIntervalValue">1000</b> ms</span><input id="telemetryInterval" type="range" min="250" max="5000" step="250" value="1000"></label></div><label class="check"><input id="telemetryPaused" type="checkbox"> Tạm dừng cập nhật dữ liệu từ máy tính</label><div class="button-row"><button id="telemetryRefreshNow" type="button">Đọc dữ liệu hiện tại</button></div><p id="telemetryMessage" class="message"></p></div>
+    <div class="card"><h2>Trạng thái thiết bị</h2><div class="stats"><span>Kết nối trực tiếp <b id="wsState">Đang kết nối</b></span><span>Bộ nhớ khả dụng <b id="freeHeap">--</b></span><span>Dung lượng lưu trữ <b id="dashboardStorage">--</b></span><span>Màn hình <b id="dashboardDisplay">--</b></span><span>Wi-Fi <b id="dashboardWifi">--</b></span><span>Chu kỳ dữ liệu <b id="dashboardUpdateRate">1 giây</b></span></div></div>
+  </section>
+
+  <section id="display" class="tab">
+    <div class="card mi50-profile">
+      <div><span class="mi50-badge">AMD INSTINCT • MI50</span><h2>Giao diện tối ưu cho vỏ card đồ họa</h2><p>Áp dụng nền đen, điểm nhấn đỏ, chữ tương phản cao và bố cục gọn cho màn hình 240×240.</p><button id="applyMi50Preset" type="button">Áp dụng giao diện MI50</button></div>
+      <div class="mi50-pages" aria-label="Xem trước các trang MI50"><article><small>NHIỆT ĐỘ</small><strong>62°C</strong><i></i></article><article><small>QUẠT GPU</small><strong>2380</strong><span>RPM</span></article><article><small>HIỆU NĂNG</small><strong>91%</strong><i></i></article></div>
+    </div>
+    <div class="card">
+      <div class="row"><div><h2>Đèn nền màn hình</h2><p>Bật, tắt hoặc điều chỉnh độ sáng của màn hình.</p></div><label class="switch"><input id="enabled" type="checkbox"><i></i></label></div>
+      <label class="range-head">Độ sáng <strong id="brightnessValue">70%</strong></label><input id="brightness" type="range" min="0" max="100" value="70">
+      <div class="button-row quick-display"><button id="screenOn" type="button">Bật màn hình</button><button id="screenOff" class="secondary" type="button">Tắt màn hình</button><button class="brightnessPreset secondary" data-value="25" type="button">25%</button><button class="brightnessPreset secondary" data-value="50" type="button">50%</button><button class="brightnessPreset secondary" data-value="75" type="button">75%</button><button class="brightnessPreset secondary" data-value="100" type="button">100%</button></div>
+    </div>
+    <div class="card"><h2>Giao diện và chuyển trang</h2>
+      <div class="form-grid"><label>Ngôn ngữ<select id="language"><option value="vi">Tiếng Việt</option><option value="en">English</option></select></label><label>Giao diện màu<select id="theme"><option value="dark">Tối</option><option value="light">Sáng</option></select></label><label>Hướng hiển thị<select id="screenRotation"><option value="0">0°</option><option value="1">90°</option><option value="2">180°</option><option value="3">270°</option></select></label><label>Hiệu ứng chuyển<select id="transitionStyle"><option value="slide">Trượt ngang mượt</option><option value="rise">Trượt lên</option><option value="none">Tắt hiệu ứng</option></select></label><label>Thời gian chuyển <span><b id="transitionDurationValue">420</b> ms</span><input id="transitionDuration" type="range" min="180" max="900" step="30" value="420"></label><label>Thời gian mỗi trang<input id="pageInterval" type="number" min="2" max="30" value="5"><span>giây</span></label><label>Thời gian trang logo<input id="logoDuration" type="number" min="2" max="30" value="5"><span>giây</span></label></div>
+      <label class="check"><input id="autoRotate" type="checkbox" checked> Tự động chuyển trang</label>
+      <label class="check"><input id="smoothValues" type="checkbox" checked> Làm mượt chuyển động của số liệu và vòng đo</label>
+      <div class="checks"><label><input class="page" data-bit="1" type="checkbox" checked> Tổng quan</label><label><input class="page" data-bit="2" type="checkbox" checked> Nhiệt độ</label><label><input class="page" data-bit="4" type="checkbox" checked> Quạt</label><label><input class="page" data-bit="8" type="checkbox" checked> Hiệu năng</label><label><input class="page" data-bit="16" type="checkbox"> Logo khởi động</label></div>
+      <div class="page-manager"><div><h3>Thứ tự hiển thị</h3><p>Sử dụng nút lên và xuống để sắp xếp các trang đã bật.</p></div><div id="pageOrderList"></div></div>
+      <p id="displayMessage" class="message"></p>
+    </div>
+    <div class="card"><h2>Bố cục tổng quan 240×240</h2><p>Tùy chỉnh tiêu đề, góc bo và màu của từng thẻ thông tin.</p>
+      <div class="bento-editor"><canvas id="bentoPreview" width="240" height="240"></canvas><div class="bento-controls"><label>Tiêu đề màn hình<input id="dashboardTitle" maxlength="12" value="PC SCREEN"></label><label>Độ bo góc <span><b id="cardRadiusValue">10</b> px</span><input id="cardRadius" type="range" min="2" max="18" value="10"></label><label class="check"><input id="showDate" type="checkbox" checked> Hiển thị ngày, tháng và năm</label><div class="color-grid"><label>CPU<input class="cardColor" data-index="0" type="color" value="#00a8ff"></label><label>GPU<input class="cardColor" data-index="1" type="color" value="#00bd70"></label><label>RAM<input class="cardColor" data-index="2" type="color" value="#ef60ff"></label><label>FPS<input class="cardColor" data-index="3" type="color" value="#ff6020"></label><label>Quạt CPU<input class="cardColor" data-index="4" type="color" value="#b8f020"></label><label>Quạt GPU<input class="cardColor" data-index="5" type="color" value="#7840ff"></label></div><button id="resetBento" class="secondary" type="button">Khôi phục màu mặc định</button></div></div>
+    </div>
+  </section>
+
+  <section id="typography" class="tab">
+    <div class="card"><h2>Kiểu chữ và màu hiển thị</h2><p>Tùy chỉnh độ lớn, độ đậm và màu chữ cho màn hình 240×240.</p>
+      <div class="typography-layout"><div class="screen-preview-shell"><canvas id="typographyPreview" width="240" height="240"></canvas><span id="rotationPreviewLabel">0°</span></div><div class="typography-controls">
+        <label class="range-head">Cỡ chữ tổng thể <strong id="fontScaleValue">100%</strong></label><input id="fontScale" type="range" min="85" max="115" step="5" value="100">
+        <div class="checks typography-checks"><label><input id="headerBold" type="checkbox" checked> Tiêu đề in đậm</label><label><input id="labelBold" type="checkbox" checked> Nhãn thông số in đậm</label><label><input id="valueBold" type="checkbox" checked> Giá trị in đậm</label></div>
+        <label class="check"><input id="customTextColors" type="checkbox"> Sử dụng màu chữ tùy chỉnh</label><div class="color-grid typography-colors"><label>Màu chữ chính<input id="primaryTextColor" type="color" value="#ffffff"></label><label>Màu chữ phụ<input id="secondaryTextColor" type="color" value="#9c9e9c"></label></div>
+        <div class="button-row"><button id="resetTypography" class="secondary" type="button">Khôi phục kiểu chữ mặc định</button></div>
+      </div></div>
+    </div>
+    <div class="card"><h2>Hướng hiển thị</h2><p>Chọn hướng phù hợp với vị trí lắp đặt. Thay đổi được áp dụng ngay trên thiết bị.</p><div class="button-row rotation-buttons"><button data-rotation="0" type="button">0°</button><button data-rotation="1" class="secondary" type="button">90°</button><button data-rotation="2" class="secondary" type="button">180°</button><button data-rotation="3" class="secondary" type="button">270°</button></div><p id="typographyMessage" class="message"></p></div>
+  </section>
+
+  <section id="rgb" class="tab"><div class="card">
+    <div class="row"><div><h2>Đèn RGB trên bo mạch</h2><p>Chọn màu, hiệu ứng và độ sáng của đèn trạng thái.</p></div><label class="switch"><input id="rgbEnabled" type="checkbox"><i></i></label></div>
+    <div class="form-grid"><label>Hiệu ứng<select id="rgbEffect"><option value="solid">Màu tĩnh</option><option value="pulse">Nhịp thở</option><option value="rainbow">Cầu vồng</option><option value="temperature">Theo nhiệt độ</option><option value="load">Theo mức tải</option></select></label><label>Màu tĩnh<input id="rgbColor" type="color" value="#00a0ff"></label></div>
+    <label class="range-head">Độ sáng <strong id="rgbBrightnessValue">25%</strong></label><input id="rgbBrightness" type="range" min="0" max="100" value="25">
+    <label class="range-head">Tốc độ hiệu ứng <strong id="rgbSpeedValue">50%</strong></label><input id="rgbSpeed" type="range" min="1" max="100" value="50">
+    <p id="rgbMessage" class="message"></p>
+  </div></section>
+
+  <section id="network" class="tab"><div class="card">
+    <h2>Wi-Fi và đồng bộ thời gian</h2><p>Kết nối thiết bị với Internet để đồng bộ ngày giờ và kiểm tra bản cập nhật. Mạng cấu hình <code>PCScreen-Setup</code> vẫn được duy trì.</p>
+    <div class="wifi-scan"><button id="scanWifi" type="button">Quét mạng Wi-Fi</button><select id="wifiScanResults"><option value="">Chọn một mạng sau khi quét</option></select><span id="wifiScanState">Chưa quét</span></div>
+    <div class="form-grid"><label>Tên mạng Wi-Fi<input id="wifiSsid" maxlength="32" autocomplete="off" placeholder="Tên mạng (SSID)"></label><label>Mật khẩu Wi-Fi<input id="wifiPassword" type="password" maxlength="63" autocomplete="new-password" placeholder="Để trống nếu không thay đổi"></label><label>Múi giờ<select id="utcOffset"><option value="420">Việt Nam • UTC+7</option><option value="480">UTC+8</option><option value="540">UTC+9</option><option value="0">UTC+0</option><option value="-300">UTC-5</option><option value="-480">UTC-8</option></select></label></div>
+    <label class="check"><input id="clearWifiPassword" type="checkbox"> Xóa mật khẩu đã lưu (Wi‑Fi mở)</label>
+    <div class="button-row"><button id="saveNetwork" type="button">Lưu và kết nối</button></div>
+    <div class="network-status"><span>Internet <b id="internetState">--</b></span><span>Đồng bộ thời gian <b id="ntpState">--</b></span><span>Giờ <b id="clockState">--:--</b></span><span>Ngày <b id="dateState">--/--/----</b></span><span>Địa chỉ mạng <b id="stationIp">--</b></span><span>Địa chỉ cấu hình <b id="accessPointIp">192.168.4.1</b></span><span>Cường độ sóng <b id="wifiRssi">--</b></span></div><p id="networkMessage" class="message"></p>
+  </div></section>
+
+  <section id="cloud" class="tab">
+    <div class="card cloud-card">
+      <div class="row"><div><h2>Trung tâm cập nhật trực tuyến</h2><p>Thiết bị tải thông tin phát hành công khai từ GitHub qua kết nối HTTPS và không lưu thông tin đăng nhập GitHub.</p></div><span id="cloudPill" class="cloud-pill">Đang chờ kết nối Internet</span></div>
+      <div class="cloud-identity"><span>Mã thiết bị<b id="cloudDeviceId">--</b></span><span>Địa chỉ MAC Wi-Fi<b id="cloudMac">--</b></span><span>Kênh phát hành<b id="cloudChannel">stable</b></span><span>Trạng thái quản lý<b id="cloudRegistered">--</b></span></div>
+      <div class="cloud-effects-head"><div><h3>Thư viện hiệu ứng</h3><p>Đồng bộ các hiệu ứng được phát hành cho PCScreen và lưu lựa chọn trên thiết bị.</p></div><b id="cloudEffectCount">0 hiệu ứng</b></div>
+      <div id="cloudEffects" class="cloud-effects"><span class="empty-effect">Chưa tải danh sách hiệu ứng.</span></div>
+      <div class="cloud-effects-head"><div><h3>Cấu hình trang hiển thị</h3><p>Đồng bộ ngôn ngữ, các trang được bật và thứ tự hiển thị.</p></div><button id="cloudApplyPages" class="secondary" type="button" disabled>Áp dụng cấu hình</button></div>
+      <div class="cloud-release"><div><small>Phiên bản hiện tại</small><strong id="cloudCurrentVersion">--</strong></div><i>→</i><div><small>Phiên bản mới nhất</small><strong id="cloudLatestVersion">--</strong></div></div>
+      <div class="button-row cloud-actions"><button id="cloudCheck" type="button">Kiểm tra cập nhật</button><button id="cloudInstall" type="button" disabled>Tải và cài đặt</button><a id="cloudConsole" class="button-link secondary" href="https://tienthanhdev.github.io/Screen-Tunring-PC-ESP32s3/" target="_blank" rel="noopener">Mở trang quản trị</a></div>
+      <p id="cloudMessage" class="message">Thiết bị sẽ tự kiểm tra khi có kết nối Internet.</p>
+      <div class="security-strip"><b>Xác thực cập nhật:</b> thiết bị kiểm tra loại bo mạch, dung lượng firmware và mã SHA‑256 trước khi cài đặt.</div>
+    </div>
+  </section>
+
+  <section id="assets" class="tab"><div class="card">
+    <h2>Ảnh khởi động 240×240</h2><p>Cắt và căn chỉnh ảnh ngay trong trình duyệt. Ảnh GIF được giữ nguyên chuyển động và tự căn giữa trên màn hình. Dung lượng tối đa: <strong>1,2 MB</strong>.</p>
+    <div class="storage-strip"><span>Dung lượng đã sử dụng <b id="assetStorageText">--</b></span><progress id="assetStorage" value="0" max="100"></progress><span>Giới hạn mỗi tệp <b id="assetLimit">1,2 MB</b></span></div>
+    <div class="asset-grid"><div class="crop-stage" id="cropStage"><canvas id="cropCanvas" width="240" height="240"></canvas><img id="bootPreview" alt="Xem trước ảnh động"><span id="bootEmpty">Chưa chọn ảnh</span><i>240 × 240</i></div><div><input id="bootFile" type="file" accept="image/png,image/jpeg,image/gif"><div id="cropControls" class="crop-controls"><label>Phóng to <strong id="cropZoomValue">100%</strong><input id="cropZoom" type="range" min="100" max="300" value="100"></label><label>Vị trí ngang<input id="cropX" type="range" min="-120" max="120" value="0"></label><label>Vị trí dọc<input id="cropY" type="range" min="-120" max="120" value="0"></label><button id="resetCrop" class="secondary" type="button">Căn giữa</button></div><label>Thời gian hiển thị <input id="bootDuration" type="number" min="1" max="10" value="4"> giây</label><div class="button-row"><button id="uploadBoot">Xử lý và tải lên</button><button id="deleteBoot" class="secondary">Xóa ảnh</button></div><p id="bootState" class="message"></p></div></div>
+  </div></section>
+
+  <section id="system" class="tab">
+    <div class="card"><h2>Thông tin và điều khiển thiết bị</h2><p>Theo dõi tài nguyên hệ thống và thực hiện các thao tác quản trị cơ bản.</p><div class="system-status"><span>Phiên bản firmware <b id="systemFirmware">--</b></span><span>Thời gian hoạt động <b id="systemUptime">--</b></span><span>Dung lượng flash <b id="systemFlash">--</b></span><span>Dung lượng lưu trữ <b id="systemStorage">--</b></span><span>Bộ nhớ khả dụng <b id="systemHeap">--</b></span><span>Trạng thái màn hình <b id="systemDisplay">--</b></span></div><div class="button-row system-actions"><button id="systemScreenOn" type="button">Bật màn hình</button><button id="systemScreenOff" class="secondary" type="button">Tắt màn hình</button><button id="restartDevice" class="danger" type="button">Khởi động lại thiết bị</button></div><p id="systemMessage" class="message"></p></div>
+    <div class="card ota-card"><h2>Cập nhật firmware từ tệp</h2><p>Chọn tệp <code>.pcota</code> dành cho PCScreen. Duy trì nguồn điện ổn định trong suốt quá trình cập nhật.</p><div class="ota-layout"><div class="ota-upload-panel"><label class="file-label">Tệp firmware<input id="otaFile" type="file" accept=".pcota,application/octet-stream"></label><div class="ota-progress-row"><progress id="otaProgress" value="0" max="100"></progress><strong id="otaProgressText">0%</strong></div><div class="button-row"><button id="uploadOta">Bắt đầu cập nhật</button></div><p id="otaState" class="message">Sẵn sàng cập nhật.</p></div><div id="otaAnimation" class="ota-animation" aria-hidden="true"><div class="ota-spinner"></div><strong id="otaAnimationText">Đang chờ tệp firmware…</strong><span>Không ngắt nguồn khi quá trình cập nhật đang diễn ra.</span></div></div></div>
+  </section>
+  <footer><strong>PCScreen firmware 1.7.0</strong><span>Phát triển bởi Nguyễn Tiến Thành</span><a href="https://github.com/TienThanhDEV" target="_blank" rel="noopener">GitHub @TienThanhDEV</a></footer>
+</main>
+<script src="/i18n.js"></script>
+<script src="/app.js"></script>
+</body></html>

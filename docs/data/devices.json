@@ -8,7 +8,7 @@
       "name": "PC Screen bàn làm việc",
       "board": "ESP32-S3 Super Mini",
       "flashMB": 4,
-      "firmware": "1.5.0",
+      "firmware": "1.6.0",
       "channel": "stable",
       "enabled": true
     }
